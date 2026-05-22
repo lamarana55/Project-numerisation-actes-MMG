@@ -13,5 +13,6 @@ public interface CommuneRepository extends JpaRepository<Commune, UUID>{
     boolean existsByCode( String code);
     Optional<Commune> findByCode(String code);
     Optional<Commune> findByNom(String nom);
+    Optional<Commune> findFirstByNomIgnoreCase(String nom);
     List<Commune> findByPrefecture(Prefecture prefecture);
 }

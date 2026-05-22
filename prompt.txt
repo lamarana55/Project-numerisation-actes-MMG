@@ -1,0 +1,120 @@
+Analyse le projet simulateur NPI situé dans 
+/Users/lamarana55/Documents/PN-RAVEC/Projects/ProjetNPI 
+et génère un nouveau projet Spring Boot nommé GenerationNPI 
+dans /Users/lamarana55/Documents/PN-RAVEC/Projects/Projet-RAVEC/GenerationNPI 
+en respectant les règles suivantes :
+
+=== STACK TECHNIQUE ===
+- Spring Boot 3.x / Java 21
+- Base de données PostgreSQL (même instance que RAVEC)
+- Maven comme gestionnaire de dépendances
+- Lombok pour réduire le boilerplate
+
+=== 1. AUTHENTIFICATION ===
+- Implémenter une authentification JWT (stateless)
+- Les appels à l'API de génération de NPI doivent être protégés par token
+- Prévoir un endpoint POST /auth/login retournant un JWT
+- Utiliser Spring Security
+
+=== 2. GESTION DES LOCALITÉS ===
+- Réutiliser la table `localite` existante (régions → préfectures → communes → quartiers)
+- Chaque quartier (type = 4) possède un new_code valide (format : communeCode + 2 derniers caractères du code du quartier)
+- Le new_code du quartier entre dans la composition du NPI
+- Par quartier donné, le système ne peut générer plus de 10 000 NPI par mois calendaire.
+  Au-delà, l'API retourne une erreur métier QUOTA_QUARTIER_DEPASSE avec le nom du quartier 
+  et la date de réinitialisation (1er du mois suivant)
+- Créer une table de suivi : npi_quota_quartier(quartier_id, mois DATE, compteur INTEGER)
+  avec incrémentation atomique du compteur à chaque génération
+
+=== 3. GÉNÉRATION DU NPI ===
+- Endpoint REST : POST /api/npi/generer
+- Supporter les 4 types de NPI avec leurs payloads respectifs :
+
+TYPE 1 — Guinéen né en Guinée (GUINEEN_NE_EN_GUINEE) :
+{
+  "type": "GUINEEN_NE_EN_GUINEE",
+  "nom": "string",
+  "prenom": "string",
+  "dateNaissance": "YYYY-MM-DD",
+  "sexe": "M | F",
+  "lieuNaissanceQuartierId": "long",
+  "numeroCertificatNaissance": "string",
+  "numeroActeNaissance": "string",
+  "communeNaissanceId": "long"
+}
+
+TYPE 2 — Guinéen né à l'étranger (GUINEEN_NE_ETRANGER) :
+{
+  "type": "GUINEEN_NE_ETRANGER",
+  "nom": "string",
+  "prenom": "string",
+  "dateNaissance": "YYYY-MM-DD",
+  "sexe": "M | F",
+  "paysNaissanceCode": "string (code ISO pays)",
+  "numeroPasseport": "string",
+  "quartierId": "long (quartier de résidence en Guinée)"
+}
+
+TYPE 3 — Étranger résident permanent (ETRANGER_RESIDENT_PERMANENT) :
+{
+  "type": "ETRANGER_RESIDENT_PERMANENT",
+  "nom": "string",
+  "prenom": "string",
+  "dateNaissance": "YYYY-MM-DD",
+  "sexe": "M | F",
+  "nationalite": "string (libellé en français)",
+  "paysNaissanceCode": "string (code ISO pays)",
+  "numeroCarte": "string (numéro carte de résident)",
+  "quartierId": "long (quartier de résidence en Guinée)"
+}
+
+TYPE 4 — Étranger résident temporaire (ETRANGER_RESIDENT_TEMPORAIRE) :
+{
+  "type": "ETRANGER_RESIDENT_TEMPORAIRE",
+  "nom": "string",
+  "prenom": "string",
+  "dateNaissance": "YYYY-MM-DD",
+  "sexe": "M | F",
+  "nationalite": "string (libellé en français)",
+  "paysNaissanceCode": "string (code ISO pays)",
+  "numeroPasseport": "string",
+  "dateExpirationTitreSejour": "YYYY-MM-DD",
+  "quartierId": "long (quartier de résidence en Guinée)"
+}
+
+- La clé de contrôle doit être calculée par l'algorithme modulo 97 (comme dans le simulateur)
+- Le NPI généré doit être unique, persisté en base et non réattribuable
+
+=== 4. STRUCTURE DES RÉPONSES ===
+Succès :
+{
+  "npi": "XXXXXXXXXXXXXXXX",
+  "type": "GUINEEN_NE_EN_GUINEE",
+  "dateGeneration": "2026-05-18T10:00:00",
+  "statut": "GENERE"
+}
+
+Quota dépassé :
+{
+  "code": "QUOTA_QUARTIER_DEPASSE",
+  "message": "Le quartier [nom] a atteint la limite de 10 000 NPI pour le mois en cours.",
+  "reinitialisation": "2026-06-01"
+}
+
+=== 5. BASE DE DONNÉES ===
+- Utiliser exactement la même base de données PostgreSQL que le backend RAVEC
+  (même datasource : hôte, port, nom de base, schéma public)
+- Récupérer les paramètres de connexion dans le application.properties du backend RAVEC
+  et les reproduire à l'identique dans GenerationNPI
+- Toutes les nouvelles tables (npi_quota_quartier, npi_genere) sont créées dans le schéma public
+- Utiliser Flyway pour les scripts de migration afin de ne pas perturber les tables RAVEC
+
+=== 6. ARCHITECTURE ===
+- Couches : controller → service → repository → entity
+- Package dédié npi.formula pour la logique de composition et le calcul modulo-97, isolé et testable
+- Tests unitaires sur la formule de génération et la clé de contrôle
+
+=== 7. CONFORMITÉ RAVEC ===
+- Format email des comptes : prenom.nom@ravec.gov.gn
+- Couleur primaire branding : #4a8a4e
+- Terminologie métier : acte, NPI, localité, quartier, ODEC

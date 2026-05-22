@@ -60,14 +60,19 @@
                     <div class="data-item">
                       <span class="data-label">Date naissance :</span>
                       <span class="data-value" *ngIf="!isEditing">{{ data.date_de_nais_membre || 'Non renseignée' }}</span>
-                      <mat-form-field *ngIf="isEditing" appearance="outline" class="date-field">
-                        <input matInput [matDatepicker]="pickerNaisMembre"
-                               [value]="stringToDate(data.date_de_nais_membre)"
-                               (dateChange)="onDateChange($event, 'date_de_nais_membre')"
-                               placeholder="JJ/MM/AAAA">
-                        <mat-datepicker-toggle matIconSuffix [for]="pickerNaisMembre"></mat-datepicker-toggle>
-                        <mat-datepicker #pickerNaisMembre></mat-datepicker>
-                      </mat-form-field>
+                      <div *ngIf="isEditing" class="date-input-wrap">
+                        <input [(ngModel)]="data.date_de_nais_membre"
+                               [class.input-error]="dateErrors['date_de_nais_membre']"
+                               class="form-control"
+                               placeholder="JJ/MM/AAAA"
+                               maxlength="10"
+                               (input)="formatDateOnInput($event, 'date_de_nais_membre')"
+                               (keydown)="handleDateKeydown($event, 'date_de_nais_membre')"
+                               (blur)="validateMemberDate()">
+                        <span class="date-error-msg" *ngIf="dateErrors['date_de_nais_membre']">
+                          <mat-icon>error_outline</mat-icon>{{ dateErrors['date_de_nais_membre'] }}
+                        </span>
+                      </div>
                     </div>
                     <div class="data-item">
                       <span class="data-label">Heure naissance :</span>
@@ -155,14 +160,19 @@
                     <div class="data-item">
                       <span class="data-label">Date des faits :</span>
                       <span class="data-value" *ngIf="!isEditing">{{ data.date_etablissement_acte || 'Non renseignée' }}</span>
-                      <mat-form-field *ngIf="isEditing" appearance="outline" class="date-field">
-                        <input matInput [matDatepicker]="pickerFaits"
-                               [value]="stringToDate(data.date_etablissement_acte)"
-                               (dateChange)="onDateChange($event, 'date_etablissement_acte')"
-                               placeholder="JJ/MM/AAAA">
-                        <mat-datepicker-toggle matIconSuffix [for]="pickerFaits"></mat-datepicker-toggle>
-                        <mat-datepicker #pickerFaits></mat-datepicker>
-                      </mat-form-field>
+                      <div *ngIf="isEditing" class="date-input-wrap">
+                        <input [(ngModel)]="data.date_etablissement_acte"
+                               [class.input-error]="dateErrors['date_etablissement_acte']"
+                               class="form-control"
+                               placeholder="JJ/MM/AAAA"
+                               maxlength="10"
+                               (input)="formatDateOnInput($event, 'date_etablissement_acte')"
+                               (keydown)="handleDateKeydown($event, 'date_etablissement_acte')"
+                               (blur)="validateFactDate()">
+                        <span class="date-error-msg" *ngIf="dateErrors['date_etablissement_acte']">
+                          <mat-icon>error_outline</mat-icon>{{ dateErrors['date_etablissement_acte'] }}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -186,7 +196,7 @@
                       <span class="data-value" *ngIf="!isEditing">{{ getNomPays(data.pays_de_naissance!) }}</span>
                       <select *ngIf="isEditing" [(ngModel)]="data.pays_de_naissance" class="form-control"
                         (change)="onPaysNaissanceChange(data.pays_de_naissance!)">
-                        <option value="GN">Guinée</option>
+                        <option value="GIN">Guinée</option>
                         <option *ngFor="let p of allPays" [value]="p.code">{{ p.nom }}</option>
                       </select>
                     </div>
@@ -284,14 +294,19 @@
                     <div class="data-item">
                       <span class="data-label">Date naissance :</span>
                       <span class="data-value" *ngIf="!isEditing">{{ data.date_de_nais_pere || 'Non renseignée' }}</span>
-                      <mat-form-field *ngIf="isEditing" appearance="outline" class="date-field">
-                        <input matInput [matDatepicker]="pickerNaisPere"
-                               [value]="stringToDate(data.date_de_nais_pere)"
-                               (dateChange)="onDateChange($event, 'date_de_nais_pere')"
-                               placeholder="JJ/MM/AAAA">
-                        <mat-datepicker-toggle matIconSuffix [for]="pickerNaisPere"></mat-datepicker-toggle>
-                        <mat-datepicker #pickerNaisPere></mat-datepicker>
-                      </mat-form-field>
+                      <div *ngIf="isEditing" class="date-input-wrap">
+                        <input [(ngModel)]="data.date_de_nais_pere"
+                               [class.input-error]="dateErrors['date_de_nais_pere']"
+                               class="form-control"
+                               placeholder="JJ/MM/AAAA"
+                               maxlength="10"
+                               (input)="formatDateOnInput($event, 'date_de_nais_pere')"
+                               (keydown)="handleDateKeydown($event, 'date_de_nais_pere')"
+                               (blur)="validateParentDate('date_de_nais_pere')">
+                        <span class="date-error-msg" *ngIf="dateErrors['date_de_nais_pere']">
+                          <mat-icon>error_outline</mat-icon>{{ dateErrors['date_de_nais_pere'] }}
+                        </span>
+                      </div>
                     </div>
                   </div>
                   <div class="col-md-6">
@@ -325,7 +340,7 @@
                       <span class="data-value" *ngIf="!isEditing">{{ getNomPays(data.pays_naissance_pere!) }}</span>
                       <select *ngIf="isEditing" [(ngModel)]="data.pays_naissance_pere" class="form-control"
                         (change)="onPaysNaissancePereChange(data.pays_naissance_pere!)">
-                        <option value="GN">Guinée</option>
+                        <option value="GIN">Guinée</option>
                         <option *ngFor="let p of allPays" [value]="p.code">{{ p.nom }}</option>
                       </select>
                     </div>
@@ -415,14 +430,19 @@
                     <div class="data-item">
                       <span class="data-label">Date naissance :</span>
                       <span class="data-value" *ngIf="!isEditing">{{ data.date_de_nais_mere || 'Non renseignée' }}</span>
-                      <mat-form-field *ngIf="isEditing" appearance="outline" class="date-field">
-                        <input matInput [matDatepicker]="pickerNaisMere"
-                               [value]="stringToDate(data.date_de_nais_mere)"
-                               (dateChange)="onDateChange($event, 'date_de_nais_mere')"
-                               placeholder="JJ/MM/AAAA">
-                        <mat-datepicker-toggle matIconSuffix [for]="pickerNaisMere"></mat-datepicker-toggle>
-                        <mat-datepicker #pickerNaisMere></mat-datepicker>
-                      </mat-form-field>
+                      <div *ngIf="isEditing" class="date-input-wrap">
+                        <input [(ngModel)]="data.date_de_nais_mere"
+                               [class.input-error]="dateErrors['date_de_nais_mere']"
+                               class="form-control"
+                               placeholder="JJ/MM/AAAA"
+                               maxlength="10"
+                               (input)="formatDateOnInput($event, 'date_de_nais_mere')"
+                               (keydown)="handleDateKeydown($event, 'date_de_nais_mere')"
+                               (blur)="validateParentDate('date_de_nais_mere')">
+                        <span class="date-error-msg" *ngIf="dateErrors['date_de_nais_mere']">
+                          <mat-icon>error_outline</mat-icon>{{ dateErrors['date_de_nais_mere'] }}
+                        </span>
+                      </div>
                     </div>
                   </div>
                   <div class="col-md-6">
@@ -456,7 +476,7 @@
                       <span class="data-value" *ngIf="!isEditing">{{ getNomPays(data.pays_naissance_mere!) }}</span>
                       <select *ngIf="isEditing" [(ngModel)]="data.pays_naissance_mere" class="form-control"
                         (change)="onPaysNaissanceMereChange(data.pays_naissance_mere!)">
-                        <option value="GN">Guinée</option>
+                        <option value="GIN">Guinée</option>
                         <option *ngFor="let p of allPays" [value]="p.code">{{ p.nom }}</option>
                       </select>
                     </div>

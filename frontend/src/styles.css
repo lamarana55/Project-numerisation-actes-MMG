@@ -223,6 +223,15 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; }
 }
 
+@media print {
+  mat-toolbar                { display: none !important; }
+  mat-drawer                 { display: none !important; }
+  mat-drawer-container       { display: block !important; min-height: 0 !important; }
+  mat-drawer-content         { display: block !important; margin-left: 0 !important; overflow: visible !important; }
+  .mat-mdc-snack-bar-container { display: none !important; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+
 /* ========================== */
 /* DIALOG ACTE SELECTION       */
 /* ========================== */

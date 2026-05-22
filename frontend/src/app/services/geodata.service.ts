@@ -2,8 +2,8 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError, of, shareReplay } from 'rxjs';
-import { catchError, tap, map } from 'rxjs/operators';
+import { Observable, throwError, of, shareReplay, forkJoin } from 'rxjs';
+import { catchError, tap, map, switchMap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import {
   CommuneDTO, PaysDTO, PrefectureDTO,
@@ -71,7 +71,13 @@ export class GeodataService {
 
   getAllPrefectures(): Observable<PrefectureDTO[]> {
     if (!this.prefecturesCache$) {
-      this.prefecturesCache$ = this.http.get<PrefectureDTO[]>(`${this.API_URL}/prefectures`).pipe(
+      this.prefecturesCache$ = this.getAllRegions().pipe(
+        switchMap(regions => {
+          if (regions.length === 0) return of([]);
+          return forkJoin(
+            regions.map(r => this.getPrefecturesByRegion(r.code))
+          ).pipe(map(arrays => ([] as PrefectureDTO[]).concat(...arrays)));
+        }),
         shareReplay(1),
         catchError((error: HttpErrorResponse) => {
           if (error.status === 401) {

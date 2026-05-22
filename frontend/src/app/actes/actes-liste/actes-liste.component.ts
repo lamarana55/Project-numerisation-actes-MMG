@@ -201,6 +201,37 @@ export class ActesListeComponent implements OnInit {
     return map[key] || 'doc-badge--unknown';
   }
 
+  getTypeActeLabel(a: ActeNaissanceSummary): string {
+    const t = (a.typeActe ?? '').toLowerCase();
+    if (t === 'naissance') return 'Naissance';
+    if (t === 'deces' || t === 'décès') return 'Décès';
+    return t || '—';
+  }
+
+  getTypeActeClass(a: ActeNaissanceSummary): string {
+    const t = (a.typeActe ?? '').toLowerCase();
+    if (t === 'naissance') return 'type-acte-tag type-acte-tag--naissance';
+    if (t === 'deces' || t === 'décès') return 'type-acte-tag type-acte-tag--deces';
+    return 'type-acte-tag';
+  }
+
+  getSourceLabel(a: ActeNaissanceSummary): string {
+    const source  = (a.source ?? a.typeCreation ?? '').toUpperCase();
+    const t       = (a.typeActe ?? '').toLowerCase();
+    const isDeces = t === 'deces' || t === 'décès';
+    if (source === 'DECLARATION') {
+      return isDeces
+        ? "Déclaration dans les délais d'un décès (2 mois)"
+        : "Déclaration dans les délais d'une naissance (6 mois)";
+    }
+    if (source === 'TRANSCRIPTION') {
+      return isDeces
+        ? "Transcription du jugement supplétif de décès"
+        : "Transcription du jugement supplétif de naissance";
+    }
+    return DOC_LABELS[source] || source || '—';
+  }
+
   getCardClass(a: ActeNaissanceSummary): string {
     const key = (a.typeCreation ?? a.source ?? '').toUpperCase();
     const map: Record<string, string> = {

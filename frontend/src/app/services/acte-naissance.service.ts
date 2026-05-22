@@ -263,9 +263,12 @@ export interface ActeDecesDTO {
 
 export interface ActeDecesDetail {
   id:                   string;
+  source?:              string;
+  typeActe?:            string;
   statut?:              string;
   actionsFaire?:        string;
   numeroActe?:          string;
+  anneeRegistre?:       string;
   // Notification
   numeroNotification?:  string;
   // Défunt
@@ -357,6 +360,10 @@ export interface ActeDecesDetail {
   pointCollecte?:       string;
   dateDressage?:        string;
   heureDressage?:       string;
+  // Transcription
+  tribunal?:            string;
+  numeroJugement?:      string;
+  dateJugement?:        string;
   // Méta
   commune?:             string;
   agentNomComplet?:     string;
@@ -529,6 +536,11 @@ export class ActeNaissanceService {
     return this.http.get(`${this.base}/${id}/pdf`, { responseType: 'blob' });
   }
 
+  /** Télécharger le PDF copie intégrale d'un acte de décès */
+  downloadPdfDeces(id: string): Observable<Blob> {
+    return this.http.get(`${environment.apiURL}/actes/deces/${id}/pdf`, { responseType: 'blob' });
+  }
+
   /** Supprimer logiquement un acte de naissance */
   deleteNaissance(id: string): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`);
@@ -550,6 +562,11 @@ export class ActeNaissanceService {
   /** Consulter le détail complet d'un acte de décès */
   getByIdDeces(id: string): Observable<ActeDecesDetail> {
     return this.http.get<ActeDecesDetail>(`${environment.apiURL}/actes/deces/${id}`);
+  }
+
+  /** Valider un acte de décès */
+  validerDeces(id: string): Observable<ActeNaissanceSummary> {
+    return this.http.put<ActeNaissanceSummary>(`${environment.apiURL}/actes/deces/${id}/valider`, {});
   }
 
   /** Mettre à jour un acte de décès */

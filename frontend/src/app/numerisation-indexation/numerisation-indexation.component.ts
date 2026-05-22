@@ -183,6 +183,14 @@ export class NumerisationIndexationComponent implements OnInit {
     },
   ];
 
+  // ── Erreurs de validation des dates ──────────────────────────────────────
+  dateErrors: Record<string, string | null> = {
+    date_de_nais_membre:      null,
+    date_etablissement_acte:  null,
+    date_de_nais_pere:        null,
+    date_de_nais_mere:        null,
+  };
+
   // ── Zoom image ────────────────────────────────────────────────────────────
   zoomLevel = 1;
   maxZoom = 3;
@@ -659,6 +667,10 @@ export class NumerisationIndexationComponent implements OnInit {
     if (v.length >= 5) f += '/' + v.substring(4, 8);
     (this.data as any)[fieldName] = f;
     setTimeout(() => input.setSelectionRange(f.length, f.length), 0);
+    // Effacer l'erreur en cours de saisie ; valider quand complet
+    if (fieldName in this.dateErrors) {
+      this.dateErrors[fieldName as string] = f.length < 10 ? null : this.computeDateError(fieldName as string);
+    }
   }
 
   handleDateKeydown(event: KeyboardEvent, fieldName: keyof ActeData): void {
@@ -672,33 +684,44 @@ export class NumerisationIndexationComponent implements OnInit {
   }
 
   validateMemberDate(): void {
-    const v = this.data.date_de_nais_membre;
-    if (!v) { this.showWarning('La date de naissance est obligatoire.'); return; }
-    const year = parseInt(v.split('/')[2]);
-    if (!year || year < 1900) {
-      this.showError("L'année de naissance doit être valide (> 1900).");
-      this.data.date_de_nais_membre = '';
-    }
+    this.dateErrors['date_de_nais_membre'] = this.computeDateError('date_de_nais_membre');
   }
 
   validateFactDate(): void {
-    const v = this.data.date_etablissement_acte;
-    if (!v) return;
-    const year = parseInt(v.split('/')[2]);
-    if (!year || year < 1900) {
-      this.showError("L'année de la date des faits doit être valide (> 1900).");
-      this.data.date_etablissement_acte = '';
-    }
+    this.dateErrors['date_etablissement_acte'] = this.computeDateError('date_etablissement_acte');
   }
 
   validateParentDate(fieldName: keyof ActeData): void {
-    const v = (this.data as any)[fieldName];
-    if (!v || v === '00/00/0000') return;
-    const year = parseInt(v.split('/')[2]);
-    if (year > 0 && year < 1900) {
-      this.showWarning("L'année doit être > 1900 ou 00/00/0000 si inconnue.");
-      (this.data as any)[fieldName] = '00/00/0000';
+    this.dateErrors[fieldName as string] = this.computeDateError(fieldName as string);
+  }
+
+  private computeDateError(fieldName: string): string | null {
+    const value: string = (this.data as any)[fieldName] ?? '';
+    const required = fieldName === 'date_de_nais_membre';
+
+    if (!value || value.trim() === '') {
+      return required ? 'La date de naissance est obligatoire' : null;
     }
+    if (value === '00/00/0000') return null; // date inconnue acceptée pour parents
+
+    if (value.length !== 10) return 'Format incomplet — utilisez JJ/MM/AAAA';
+
+    const parts = value.split('/');
+    if (parts.length !== 3) return 'Format invalide — utilisez JJ/MM/AAAA';
+
+    const [d, m, y] = parts.map(Number);
+    if (isNaN(d) || isNaN(m) || isNaN(y)) return 'Date non numérique';
+    if (m < 1 || m > 12)  return `Mois invalide : ${parts[1]} (attendu 01–12)`;
+    if (d < 1 || d > 31)  return `Jour invalide : ${parts[0]} (attendu 01–31)`;
+
+    const date = new Date(y, m - 1, d);
+    if (date.getDate() !== d || date.getMonth() !== m - 1 || date.getFullYear() !== y) {
+      return `Date inexistante : ${value}`;
+    }
+    if (y < 1900) return `Année invalide : ${y} (minimum 1900)`;
+    if (y > new Date().getFullYear()) return `Année dans le futur : ${y}`;
+
+    return null;
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -706,6 +729,14 @@ export class NumerisationIndexationComponent implements OnInit {
   // ═══════════════════════════════════════════════════════════════════════════
 
   saveActe(): void {
+    // Valider toutes les dates avant sauvegarde
+    Object.keys(this.dateErrors).forEach(f => {
+      this.dateErrors[f] = this.computeDateError(f);
+    });
+    if (Object.values(this.dateErrors).some(e => e !== null)) {
+      this.showWarning('Veuillez corriger les dates invalides avant de sauvegarder.');
+      return;
+    }
     if (!this.data.nom_membre || !this.data.prenoms || !this.data.date_de_nais_membre) {
       this.showWarning('Nom, prénoms et date de naissance sont obligatoires.');
       return;
@@ -751,6 +782,12 @@ export class NumerisationIndexationComponent implements OnInit {
     this.communesNaissanceMere = [];
     this.quartiersNaissanceMere = [];
     this.villesNaissanceMere = [];
+    this.dateErrors = {
+      date_de_nais_membre:     null,
+      date_etablissement_acte: null,
+      date_de_nais_pere:       null,
+      date_de_nais_mere:       null,
+    };
     this.resetZoom();
   }
 

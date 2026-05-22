@@ -1,5 +1,6 @@
 package gov.ravec.backend.controllers;
 
+import gov.ravec.backend.dto.ActeDecesDetailDTO;
 import gov.ravec.backend.dto.ActeDecesRequest;
 import gov.ravec.backend.dto.ActePageResponseDTO;
 import gov.ravec.backend.dto.ActeSummaryDTO;
@@ -70,6 +71,24 @@ public class ActeDecesController {
     public ResponseEntity<ActeSummaryDTO> createTranscription(@RequestBody ActeDecesRequest request) {
         ActeSummaryDTO saved = acteDecesService.createTranscription(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    }
+
+    // ── GET /actes/deces/{id} ─────────────────────────────────────
+
+    @Operation(summary = "Consulter le détail d'un acte de décès")
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('CAN_VIEW_VALIDATED_ACTS')")
+    public ResponseEntity<ActeDecesDetailDTO> getById(@PathVariable String id) {
+        return ResponseEntity.ok(acteDecesService.getById(id));
+    }
+
+    // ── PUT /actes/deces/{id}/valider ─────────────────────────────
+
+    @Operation(summary = "Valider un acte de décès")
+    @PutMapping("/{id}/valider")
+    @PreAuthorize("hasAuthority('CAN_VALIDATE_ACTS')")
+    public ResponseEntity<ActeSummaryDTO> valider(@PathVariable String id) {
+        return ResponseEntity.ok(acteDecesService.valider(id));
     }
 
     // ── DELETE /actes/deces/{id} ──────────────────────────────────

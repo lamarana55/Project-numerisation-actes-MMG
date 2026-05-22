@@ -56,6 +56,9 @@ services:
       JWT_SECURITY: ${JWT_SECURITY:-dev_secret_key_change_in_prod}
       SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME:-}
       SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD:-}
+      NPI_SERVICE_URL: http://generation-npi:8092/api/v1
+      NPI_SERVICE_USERNAME: ${NPI_SERVICE_USERNAME:-superadmin@ravec.gov.gn}
+      NPI_SERVICE_PASSWORD: ${NPI_SERVICE_PASSWORD:-ChangeMe2026!}
       # Active Spring DevTools
       SPRING_DEVTOOLS_RESTART_ENABLED: "true"
       SPRING_DEVTOOLS_LIVERELOAD_ENABLED: "true"
@@ -67,6 +70,39 @@ services:
       - ./backend/src:/app/src
       - ./backend/pom.xml:/app/pom.xml
       # Cache Maven pour ne pas retélécharger les dépendances à chaque rebuild
+      - maven_cache:/root/.m2
+    networks:
+      - ravec-num-network-dev
+
+  # ──────────────────────────────────────────
+  #  GenerationNPI — HOT RELOAD via spring-boot-devtools
+  # ──────────────────────────────────────────
+  generation-npi:
+    build:
+      context: ./GenerationNPI
+      dockerfile: Dockerfile.dev
+    container_name: ravec-num-generation-npi-dev
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_IP: postgres
+      DATABASE_PORT: 5432
+      DATABASE: ${DATABASE:-db_numerisation}
+      DATABASE_USER: ${DATABASE_USER:-postgres}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+      SERVER_PORT: 8092
+      FRONT_URL: ${FRONT_URL:-http://localhost:4200}
+      JWT_SECURITY: ${JWT_SECURITY:-dev_secret_key_change_in_prod}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400}
+      NPI_QUOTA_MENSUEL: ${NPI_QUOTA_MENSUEL:-10000}
+      SPRING_DEVTOOLS_RESTART_ENABLED: "true"
+    ports:
+      - "${NPI_SERVER_PORT:-8092}:8092"
+    volumes:
+      - ./GenerationNPI/src:/app/src
+      - ./GenerationNPI/pom.xml:/app/pom.xml
       - maven_cache:/root/.m2
     networks:
       - ravec-num-network-dev

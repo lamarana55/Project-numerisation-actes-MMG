@@ -49,6 +49,7 @@ public class ActeSummaryDTO {
     private String commune;
     private String agentNomComplet;
     private String createdAt;
+    private String npi;
 
     // ── Factory : depuis ActeNaissance ────────────────────────────
     public static ActeSummaryDTO from(ActeNaissance a) {
@@ -75,6 +76,7 @@ public class ActeSummaryDTO {
                 .commune(a.getCommune() != null ? a.getCommune().getNom() : null)
                 .agentNomComplet(a.getAgent() != null ? a.getAgent().getNomComplet() : null)
                 .createdAt(a.getCreatedAt() != null ? a.getCreatedAt().toString() : null)
+                .npi(a.getEnfant() != null ? a.getEnfant().getNpi() : null)
                 .build();
     }
 
@@ -103,6 +105,7 @@ public class ActeSummaryDTO {
                 .commune(a.getCommune() != null ? a.getCommune().getNom() : null)
                 .agentNomComplet(a.getAgent() != null ? a.getAgent().getNomComplet() : null)
                 .createdAt(a.getCreatedAt() != null ? a.getCreatedAt().toString() : null)
+                .npi(a.getDefunt() != null ? a.getDefunt().getNpi() : null)
                 .build();
     }
 }

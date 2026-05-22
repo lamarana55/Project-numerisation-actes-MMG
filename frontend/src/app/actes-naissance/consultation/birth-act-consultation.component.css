@@ -1,71 +1,128 @@
-/* ══════════════════════════════════════════════════════════════
-   CONSULTATION ACTE DE NAISSANCE
-   ══════════════════════════════════════════════════════════════ */
+:host { display: block; background: #dde2e8; min-height: 100vh; }
 
-:host { display: block; background: #f0f4f8; min-height: 100vh; }
-
-/* ── EN-TÊTE ─────────────────────────────────────────────────── */
+/* ── EN-TÊTE PAGE ───────────────────────────────────────────── */
 .page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 28px;
+  padding: 12px 24px;
   background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 60%, #388e3c 100%);
   color: white;
   box-shadow: 0 2px 10px rgba(27,94,32,.35);
-  flex-wrap: wrap;
-  gap: 12px;
+  gap: 16px;
+  flex-shrink: 0;
 }
-
 .page-header-left {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
+  min-width: 0;
+  flex-shrink: 1;
 }
-
 .header-icon {
-  width: 44px; height: 44px;
+  width: 38px; height: 38px;
   background: rgba(255,255,255,.15);
-  border-radius: 12px;
+  border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
 }
-.header-icon mat-icon { font-size: 26px; width: 26px; height: 26px; color: white; }
+.header-icon mat-icon { font-size: 20px; width: 20px; height: 20px; color: white; }
+.page-title    { font-size: 15px; font-weight: 700; margin: 0; color: white; white-space: nowrap; }
+.page-subtitle { font-size: 11.5px; color: rgba(255,255,255,.75); margin: 2px 0 0; white-space: nowrap; }
 
-.page-title { font-size: 17px; font-weight: 700; margin: 0; color: white; }
-.page-subtitle { font-size: 12px; color: rgba(255,255,255,.75); margin: 2px 0 0; }
+.page-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
 
-.page-header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-
+/* ── BOUTONS ─────────────────────────────────────────────────── */
 .btn-action {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 8px 18px; border-radius: 8px; border: none;
-  font-size: 13px; font-weight: 600; cursor: pointer;
-  transition: all .18s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 18px;
+  height: 36px;
+  border-radius: 18px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  letter-spacing: .2px;
+  cursor: pointer;
+  white-space: nowrap;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  transition: background .15s, box-shadow .15s, transform .15s;
 }
-.btn-action mat-icon { font-size: 16px; width: 16px; height: 16px; }
-.btn-action--outline {
-  background: rgba(255,255,255,.12); color: white;
-  border: 1.5px solid rgba(255,255,255,.4);
-}
-.btn-action--outline:hover { background: rgba(255,255,255,.22); }
-.btn-action--edit {
-  background: #fff8e1; color: #e65100;
-  border: 1.5px solid #ffe0b2;
-}
-.btn-action--edit:hover { background: #ffe0b2; }
-.btn-action--validate {
-  background: #e8f5e9; color: #2e7d32;
-  border: 1.5px solid #a5d6a7;
-}
-.btn-action--validate:hover { background: #c8e6c9; }
-.btn-action--validate:disabled { opacity: .6; cursor: not-allowed; }
-.btn-action--pdf {
-  background: #b71c1c; color: white;
-  border: 1.5px solid #c62828;
-}
-.btn-action--pdf:hover { background: #c62828; }
+.btn-action span { line-height: 1; }
+.btn-action mat-icon { font-size: 17px; width: 17px; height: 17px; flex-shrink: 0; line-height: 17px; }
+.btn-action:active { transform: scale(.97) !important; }
 
-/* ── ÉTAT ─────────────────────────────────────────────────────── */
+/* Retour — texte seul, discret */
+.btn-action--outline {
+  background: rgba(255,255,255,.10);
+  color: rgba(255,255,255,.88);
+  border: 1.5px solid rgba(255,255,255,.30);
+}
+.btn-action--outline:hover {
+  background: rgba(255,255,255,.20);
+  border-color: rgba(255,255,255,.55);
+  color: white;
+}
+
+/* Modifier — ghost intermédiaire */
+.btn-action--edit {
+  background: rgba(255,255,255,.16);
+  color: white;
+  border: 1.5px solid rgba(255,255,255,.40);
+}
+.btn-action--edit:hover {
+  background: rgba(255,255,255,.28);
+  border-color: rgba(255,255,255,.65);
+}
+
+/* Valider l'acte — CTA dominant, fond blanc solide */
+.btn-action--validate {
+  background: #ffffff;
+  color: #1b5e20;
+  border: none;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25), 0 0 0 0 rgba(255,255,255,0);
+  padding: 0 28px;
+  min-width: 160px;
+}
+.btn-action--validate:hover {
+  background: #f0faf0;
+  box-shadow: 0 4px 16px rgba(0,0,0,.30);
+  transform: translateY(-1px);
+}
+.btn-action--validate:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none;
+}
+
+/* PDF — rouge signature */
+.btn-action--pdf {
+  background: linear-gradient(135deg, #e53935, #b71c1c);
+  color: white;
+  border: none;
+  font-weight: 700;
+  box-shadow: 0 2px 10px rgba(183,28,28,.45);
+  padding: 0 24px;
+  min-width: 170px;
+}
+.btn-action--pdf:hover {
+  background: linear-gradient(135deg, #ef5350, #c62828);
+  box-shadow: 0 4px 16px rgba(183,28,28,.55);
+  transform: translateY(-1px);
+}
+
+/* ── ÉTATS ──────────────────────────────────────────────────── */
 .state-box {
   display: flex; flex-direction: column; align-items: center;
   justify-content: center; gap: 12px; padding: 60px 24px;
@@ -73,214 +130,362 @@
 }
 .state-box--error { color: #c62828; }
 
-/* ── CORPS ──────────────────────────────────────────────────────── */
-.acte-body { padding: 24px 28px; }
+/* ── CORPS ──────────────────────────────────────────────────── */
+.acte-body { padding: 24px 32px 56px; }
 
 /* Bandeau statut */
 .statut-banner {
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-  padding: 10px 18px; border-radius: 10px; margin-bottom: 20px;
+  padding: 9px 18px; border-radius: 10px; margin-bottom: 20px;
   font-size: 13px; font-weight: 600;
 }
-.statut-banner mat-icon { font-size: 20px; width: 20px; height: 20px; }
-.statut-banner--valide {
-  background: #e8f5e9; color: #1a7a3c; border: 1px solid #a5d6a7;
-}
-.statut-banner--brouillon {
-  background: #f0f2f5; color: #637089; border: 1px solid #dce1ea;
-}
-.statut-banner--corriger {
-  background: #fef2f2; color: #b91c1c; border: 1px solid #fca5a5;
-}
-.source-badge {
-  background: rgba(0,0,0,.07); padding: 2px 10px;
-  border-radius: 20px; font-size: 12px;
-}
-.meta-info { color: inherit; opacity: .7; font-size: 12px; }
+.statut-banner mat-icon { font-size: 18px; width: 18px; height: 18px; }
+.statut-banner--valide    { background: #e8f5e9; color: #1a7a3c; border: 1px solid #a5d6a7; }
+.statut-banner--brouillon { background: #f0f2f5; color: #637089; border: 1px solid #dce1ea; }
+.statut-banner--corriger  { background: #fef2f2; color: #b91c1c; border: 1px solid #fca5a5; }
+.source-badge { background: rgba(0,0,0,.07); padding: 2px 10px; border-radius: 20px; font-size: 11px; }
+.meta-info    { opacity: .7; font-size: 11px; }
 
-/* ── DOCUMENT OFFICIEL ──────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   DOCUMENT OFFICIEL
+   ══════════════════════════════════════════════════════════════ */
 .acte-document {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 28px rgba(0,0,0,.10), 0 1px 6px rgba(0,0,0,.06);
-  padding: 36px 44px;
-  max-width: 880px;
-  margin: 0 auto;
-  border: 1px solid #e8edf2;
   position: relative;
+  max-width: 960px;
+  margin: 0 auto;
+  background-color: #fdfcf8;
+  border: 1px solid #bbb;
+  box-shadow: 0 8px 32px rgba(0,0,0,.13), 0 2px 6px rgba(0,0,0,.06);
+  overflow: hidden;
 }
 
-/* En-tête document */
+/* Cercle branding bas-droite */
+.acte-document::after {
+  content: '';
+  position: absolute;
+  bottom: 28px; right: 28px;
+  width: 130px; height: 130px;
+  border-radius: 50%;
+  border: 1.2px solid rgba(206,17,38,.30);
+  background-image: url('/assets/images/gn.png');
+  background-size: 88% auto;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.11;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Filigrane guilloché tricolore — 3 couches + trame diagonale */
+.doc-filigrane {
+  position: absolute; inset: 0;
+  background-image: url('/assets/filigrane.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.55;
+  mix-blend-mode: multiply;
+  pointer-events: none; z-index: 0;
+}
+
+/* Armoirie dans l'en-tête */
+.hd-center {
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.hd-armoirie {
+  width: 95px; height: auto;
+  opacity: 0.88;
+}
+
+/* Contenu */
+.doc-inner {
+  position: relative; z-index: 1;
+  padding: 36px 48px 40px;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+/* ══ EN-TÊTE DOCUMENT ════════════════════════════════════════ */
 .doc-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 8px;
+  gap: 20px;
+  margin-bottom: 6px;
 }
-.republic-title {
-  font-size: 12px; font-weight: 800; letter-spacing: .8px;
-  text-transform: uppercase; color: #1a1a1a;
-}
-.devise {
-  font-size: 11px; font-style: italic; margin: 3px 0 8px; color: #37474f;
-}
-.rouge { color: #ce1126; font-weight: 700; }
-.jaune { color: #bf9000; font-weight: 700; }
-.vert  { color: #00853f; font-weight: 700; }
-.doc-commune {
-  font-size: 11px; font-weight: 700;
-  color: #1b5e20; background: #f1f8e9;
-  display: inline-block; padding: 2px 8px;
-  border-radius: 4px; border: 1px solid #c8e6c9;
-}
-.doc-header-right { text-align: right; }
-.doc-copy-label {
-  font-size: 9px; font-weight: 800; letter-spacing: 1.5px;
-  color: #8d6e63; text-transform: uppercase;
-  background: #efebe9; padding: 2px 8px; border-radius: 4px;
-  display: inline-block; margin-bottom: 4px;
-}
-.doc-type {
-  font-size: 18px; font-weight: 800; color: #1b5e20;
+
+.hd-republic {
+  margin: 0 0 2px;
+  font-size: 16px; font-weight: 900;
   text-transform: uppercase; letter-spacing: .5px;
+  color: #111;
 }
-.doc-registre {
-  font-size: 11px; color: #455a64; margin-top: 4px;
-  line-height: 1.6;
+.hd-devise {
+  margin: 0 0 14px;
+  font-size: 13.5px; font-style: italic; color: #333;
 }
-
-/* Ligne tricolore */
-.tricolor-line {
-  display: flex; height: 3px; margin: 10px 0 20px;
-}
-.rouge-bar { flex: 1; background: #ce1126; }
-.jaune-bar { flex: 1; background: #fcd116; }
-.vert-bar  { flex: 1; background: #00853f; }
-
-/* ── NPI HÉROS ───────────────────────────────────────────────── */
-.npi-hero {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  background: linear-gradient(135deg, #e3f2fd 0%, #ede7f6 100%);
-  border: 1.5px solid #90caf9;
-  border-radius: 10px;
-  padding: 12px 20px;
-  margin-bottom: 22px;
-}
-.npi-hero--pending {
-  background: #f8f9fa;
-  border-color: #dce1ea;
-}
-.npi-hero-left {
-  display: flex; align-items: center; gap: 8px;
-}
-.npi-hero-left mat-icon {
-  font-size: 22px; width: 22px; height: 22px; color: #1565c0;
-}
-.npi-hero--pending .npi-hero-left mat-icon { color: #9e9e9e; }
-.npi-hero-label {
-  font-size: 11px; font-weight: 700; color: #37474f;
-  text-transform: uppercase; letter-spacing: .5px;
-}
-.npi-hero-value {
-  font-family: 'Courier New', monospace;
-  font-size: 18px; font-weight: 700;
-  color: #0d47a1;
-  letter-spacing: 3px;
-  background: white;
-  padding: 4px 14px;
-  border-radius: 6px;
-  border: 1px solid #90caf9;
-  box-shadow: 0 1px 4px rgba(13,71,161,.1);
-}
-.npi-hero-empty {
-  font-size: 12px; font-style: italic; color: #9e9e9e;
+.hd-location p {
+  margin: 0;
+  font-size: 14px; color: #222; line-height: 1.7;
 }
 
-/* ── SECTIONS ────────────────────────────────────────────────── */
-.doc-section {
-  margin-bottom: 24px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #eceff1;
+.hd-right { text-align: center; flex-shrink: 0; }
+.hd-acte-title {
+  margin: 0 0 2px;
+  font-size: 22px; font-weight: 900;
+  color: #111;
 }
-.doc-section:last-child { border-bottom: none; }
+.hd-copie-integrale {
+  margin: 0 0 8px;
+  font-size: 16px; font-weight: 700;
+  font-style: italic; color: #333;
+}
+.hd-registre {
+  margin: 0;
+  font-size: 15px; color: #222;
+}
+.hd-numero {
+  margin: 2px 0 0;
+  font-size: 15px; color: #222;
+}
+
+/* Barre tricolore */
+.tricolor-bar {
+  display: flex; height: 4px; margin: 14px 0 20px; border-radius: 1px; overflow: hidden;
+}
+.tc-r { flex: 1; background: #ce1126; }
+.tc-y { flex: 1; background: #fcd116; }
+.tc-g { flex: 1; background: #00853f; }
+
+/* ══ SECTIONS ════════════════════════════════════════════════ */
+.doc-section { margin-bottom: 12px; }
 
 .section-title {
-  font-size: 13px; font-weight: 800;
-  text-decoration: underline;
+  font-size: 16px; font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: .5px;
-  color: #1b5e20;
-  margin: 0 0 14px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  color: #111;
+  margin: 0 0 4px;
+  padding: 0;
+  border: none;
+  background: none;
 }
 
-/* ── CHAMPS ──────────────────────────────────────────────────── */
-.fields-grid { display: flex; flex-direction: column; gap: 6px; }
-
+/* ══ LIGNES DE CHAMPS : label | : | valeur ═══════════════════ */
 .field-row {
   display: grid;
-  grid-template-columns: 220px 16px 1fr;
-  align-items: baseline;
-  gap: 4px;
+  grid-template-columns: 260px 28px 1fr;
+  align-items: start;
+  padding: 2px 0;
+  line-height: 1.5;
 }
-.field-label {
-  font-size: 11px; font-weight: 700; font-style: italic;
-  color: #37474f;
+
+.fl-label {
+  font-size: 15px; font-weight: 700; font-style: italic;
+  color: #111;
 }
-.field-sep { color: #37474f; font-weight: 700; }
-.field-value { font-size: 12px; color: #212121; }
-.npi-value { font-family: monospace; font-size: 12px; font-weight: 700; color: #1565c0; }
-.name-value { font-weight: 600; font-size: 13px; color: #1b5e20; }
 
-/* ── TABLEAU PARENTS ─────────────────────────────────────────── */
-.parents-table { display: flex; flex-direction: column; gap: 0; }
+.fl-sep {
+  font-size: 15px; color: #111;
+  padding-top: 1px;
+}
 
-.parents-header, .parents-row {
+.fl-value {
+  font-size: 15px; color: #111;
+}
+
+.fl-npi {
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: 800; font-size: 15px;
+  color: #0d47a1;
+}
+
+.fl-pending { font-style: italic; color: #999; font-size: 14px; }
+
+/* ══ PARENTS : label | : | PÈRE | MÈRE ══════════════════════ */
+.parents-grid {
   display: grid;
-  grid-template-columns: 160px 1fr 1fr;
-  gap: 8px;
-  padding: 5px 8px;
-  border-radius: 4px;
+  grid-template-columns: 260px 28px 1fr 1fr;
+  align-items: start;
+  gap: 2px 0;
+  line-height: 1.5;
 }
-.parents-header {
-  background: #f5f7fa;
-  font-size: 11px; font-weight: 800;
-  color: #37474f;
-  margin-bottom: 4px;
-}
-.parents-row:nth-child(even) { background: #fafafa; }
 
-.parents-col-label {
-  font-size: 11px; font-weight: 700; font-style: italic; color: #37474f;
-}
-.parents-col { font-size: 12px; color: #212121; }
-.parents-col--pere { color: #1565c0; font-weight: 700; text-align: center; }
-.parents-col--mere { color: #880e4f; font-weight: 700; text-align: center; }
+.pg-empty { }
 
-/* ── MARIAGE ─────────────────────────────────────────────────── */
+.pg-col-header {
+  font-size: 15px; font-weight: 900;
+  color: #111;
+  padding-bottom: 8px;
+}
+
+/* Les cellules label/sep/value dans parents-grid réutilisent les mêmes classes */
+.parents-grid .fl-label,
+.parents-grid .fl-sep,
+.parents-grid .fl-value { padding: 3px 0; }
+
+/* ── MARIAGE ─────────────────────────────────────────────── */
 .marriage-info {
   display: flex; align-items: center; gap: 8px;
-  margin-top: 12px;
-  padding: 8px 14px;
-  background: #fce4ec;
-  border-radius: 8px;
-  font-size: 12px; color: #880e4f;
+  margin-top: 10px; padding: 7px 12px;
+  background: #fce4ec; border-radius: 5px;
+  font-size: 14px; color: #880e4f;
 }
 .marriage-info mat-icon { font-size: 16px; width: 16px; height: 16px; color: #e91e63; }
 
-/* ── CLÔTURE ─────────────────────────────────────────────────── */
-.closing-formula {
-  margin-top: 20px;
-  padding: 16px 20px;
-  background: #f9fbe7;
-  border-left: 3px solid #2e7d32;
-  border-radius: 4px;
-  font-size: 12px;
-  font-style: italic;
-  color: #33691e;
-  line-height: 1.7;
+/* ══ CLÔTURE ═════════════════════════════════════════════════ */
+.closing-section {
+  margin-top: 28px;
+  padding-top: 0;
 }
-.closing-formula p { margin: 0 0 6px; }
-.closing-formula p:last-child { margin-bottom: 0; }
+.closing-text {
+  font-size: 15px; color: #111;
+  line-height: 1.8; text-align: justify;
+  margin: 0 0 12px;
+}
+.closing-dresse {
+  font-size: 15px; color: #111;
+  line-height: 1.8; margin: 0;
+}
+
+/* ══ PIED DE DOCUMENT ═══════════════════════════════════════ */
+.doc-footer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid #ccc;
+}
+
+/* ── ONGLETS DOCUMENT ────────────────────────────────────── */
+.doc-tabs {
+  display: flex; gap: 4px;
+  margin-bottom: 16px;
+}
+.doc-tab {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 18px; border-radius: 8px 8px 0 0;
+  border: 1.5px solid #dce1ea; border-bottom: none;
+  background: #eef0f3; color: #637089;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.doc-tab mat-icon { font-size: 16px; width: 16px; height: 16px; }
+.doc-tab:hover { background: #e2e7ef; color: #3a4a6b; }
+.doc-tab--active {
+  background: #fff; color: #1b5e20;
+  border-color: #b0bec5; border-bottom-color: #fff;
+  z-index: 1;
+}
+
+/* ── QR CODE ─────────────────────────────────────────────── */
+.qr-zone { flex-shrink: 0; }
+.qr-img { width: 90px; height: 90px; display: block; border: 1px solid #ccc; }
+.qr-placeholder {
+  width: 90px; height: 90px;
+  border: 1px solid #ccc; background: #f5f5f5;
+  display: flex; align-items: center; justify-content: center;
+}
+.qr-placeholder mat-icon { font-size: 48px; width: 48px; height: 48px; color: #bbb; }
+.qr-npi {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 10px; font-weight: 700; color: #333;
+  text-align: center; margin: 3px 0 0;
+}
+
+/* ── SIGNATURE / PIED ────────────────────────────────────── */
+.footer-sig { flex: 1; display: flex; justify-content: center; }
+.footer-sig-label {
+  font-size: 15px; font-weight: 700;
+  margin: 0 0 4px; color: #111;
+}
+.footer-sig-space { height: 52px; }
+.footer-officer {
+  font-size: 14px; color: #333; margin: 0;
+}
+.footer-officer-title {
+  font-size: 14px; font-weight: 700; color: #111; margin: 0 0 4px;
+}
+
+/* ── CACHET OFFICIEL ─────────────────────────────────────── */
+.stamp-circle {
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  border: 3px solid #1b5e20;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(27,94,32,.04);
+}
+.stamp-inner {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 2px; text-align: center;
+}
+.stamp-top, .stamp-mid, .stamp-bot {
+  font-size: 9px; font-weight: 800;
+  letter-spacing: .5px; text-transform: uppercase; color: #1b5e20;
+  line-height: 1.2;
+}
+.stamp-mid { font-size: 10px; }
+
+/* ── CERTIFICATION FOOTER ────────────────────────────────── */
+.footer-cert { flex: 1; }
+.footer-cert p {
+  font-size: 14px; color: #111; margin: 0 0 4px;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+/* ── MENTIONS MARGINALES ─────────────────────────────────── */
+.mentions-marginales {
+  margin: 16px 0 8px;
+  padding: 7px 12px;
+  background: #f8f8f4;
+  border-left: 3px solid #aaa;
+  font-size: 14px; color: #555;
+}
+
+/* ── SOUS-TITRE COPIE INTÉGRALE ──────────────────────────── */
+.hd-copie-sub {
+  margin: 0 0 8px;
+  font-size: 14px; font-style: italic; color: #444;
+}
+
+/* ── RESPONSIVE ─────────────────────────────────────────── */
+@media (max-width: 700px) {
+  .acte-body  { padding: 10px 6px 32px; }
+  .doc-inner  { padding: 18px 14px 22px; }
+  .doc-header { flex-direction: column; }
+  .hd-right   { text-align: left; }
+  .field-row  { grid-template-columns: 180px 22px 1fr; }
+  .parents-grid { grid-template-columns: 180px 22px 1fr 1fr; }
+  .fl-label, .parents-grid .fl-label { font-size: 13px; }
+  .fl-value, .parents-grid .fl-value { font-size: 13px; }
+}
+
+/* ── IMPRESSION PDF ──────────────────────────────────────── */
+@media print {
+  .page-header   { display: none !important; }
+  .statut-banner { display: none !important; }
+  .doc-tabs      { display: none !important; }
+
+  .consult-page  { background: white !important; }
+  .acte-body     { padding: 0 !important; }
+
+  .acte-document {
+    max-width: 210mm !important;
+    margin: 0 auto !important;
+    box-shadow: none !important;
+    border: none !important;
+    overflow: visible !important;
+    page-break-inside: avoid;
+  }
+
+  .doc-filigrane,
+  .hd-armoirie,
+  .acte-document::after {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

@@ -14,14 +14,14 @@ import java.util.List;
 @Configuration
 public class OpenAPIConfig {
 
-    @Value("${ravec.domaine.url:http://localhost:8083}")
+    @Value("${ravec.domaine.url}")
     private String serverUrl;
 
     @Bean
     public OpenAPI customOpenAPI() {
         // Configuration du contact
         Contact contact = new Contact()
-                .email("devlogiciel@ravec.gov.gn")
+                .email("ml.diallo@ravec.gov.gn")
                 .name("MAMADOU LAMARANA DIALLO")
                 .url("https://www.ravec.gov.gn");
 
@@ -32,7 +32,7 @@ public class OpenAPIConfig {
 
         // Configuration des serveurs
         Server localServer = new Server()
-                .url("http://localhost:8083")
+                .url("serverUrl")
                 .description("Serveur de développement local");
 
         Server prodServer = new Server()
@@ -42,8 +42,8 @@ public class OpenAPIConfig {
         return new OpenAPI()
                 .servers(List.of(localServer, prodServer))
                 .info(new Info()
-                        .title("RAVEC Backend Simulation API")
-                        .description("API pour la simulation du NPI - RAVEC Guinée")
+                        .title("RAVEC Backend API")
+                        .description("API pour la gestion de l'état civil- RAVEC Guinée")
                         .version("v1.0.0")
                         .contact(contact)
                         .license(license)

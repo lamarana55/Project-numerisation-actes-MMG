@@ -13,5 +13,6 @@ import java.util.List;
 public interface QuartierRepository extends JpaRepository<Quartier, UUID>{
     boolean existsByCode( String code);
     Optional<Quartier> findByCode(String code);
+    Optional<Quartier> findFirstByNomIgnoreCase(String nom);
     List<Quartier> findByCommune(Commune commune);
 }
