@@ -101,6 +101,10 @@ import { DeathActTranscriptionComponent } from './actes-deces/transcription/deat
 import { DeathActConsultationComponent } from './actes-deces/consultation/death-act-consultation.component';
 import { DeathActesReprisComponent } from './actes-deces/actes-repris/death-actes-repris.component';
 
+// Actes de mariage
+import { MarriageActCreationComponent } from './actes-mariage/creation/marriage-act-creation.component';
+import { MarriageActConsultationComponent } from './actes-mariage/consultation/marriage-act-consultation.component';
+
 // Rapports
 import { RapportsComponent } from './rapports/rapports.component';
 
@@ -166,6 +170,9 @@ registerLocaleData(localeFr);
     DeathActTranscriptionComponent,
     DeathActConsultationComponent,
     DeathActesReprisComponent,
+    // Actes de mariage
+    MarriageActCreationComponent,
+    MarriageActConsultationComponent,
     // Rapports
     RapportsComponent,
     // Actes unifiés

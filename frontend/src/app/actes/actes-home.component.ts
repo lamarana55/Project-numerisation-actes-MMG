@@ -410,6 +410,10 @@ export class ActesHomeComponent {
 
   today = new Date();
 
+  navigateToMariage(): void {
+    this.router.navigate(['/admin/actes-mariage/creation']);
+  }
+
   openCreationDialog(type: 'naissance' | 'deces' | 'autres'): void {
     const ref = this.dialog.open(ActeSelectionDialogComponent, {
       width: '960px',

@@ -168,9 +168,12 @@ export class ActesListeComponent implements OnInit {
     ref.afterClosed().subscribe((confirmed: boolean) => {
       if (!confirmed) return;
 
-      const delete$ = (a.typeActe ?? 'naissance').toLowerCase() === 'deces'
+      const typeActe = (a.typeActe ?? 'naissance').toLowerCase();
+      const delete$ = typeActe === 'deces'
         ? this.acteService.deleteDeces(a.id)
-        : this.acteService.deleteNaissance(a.id);
+        : typeActe === 'mariage'
+          ? this.acteService.deleteMariage(a.id)
+          : this.acteService.deleteNaissance(a.id);
 
       delete$.subscribe({
         next: () => {

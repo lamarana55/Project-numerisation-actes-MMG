@@ -167,6 +167,7 @@ export class BirthActConsultationComponent implements OnInit {
   /* ── Statut ───────────────────────────────────────────────── */
   get isValide(): boolean    { return this.acte?.statut === 'VALIDE'; }
   get canValider(): boolean  {
+    if (this.isValide) return false;
     const af = (this.acte?.actionsFaire ?? '').toUpperCase();
     return af === 'A_VALIDER';
   }

@@ -290,6 +290,9 @@ public class ActeNaissanceService {
                     req.getAdressePere(), req.getPaysResidencePere(),
                     req.getRegionDomicilePere(), req.getPrefectureDomicilePere(),
                     req.getCommuneDomicilePere(), req.getQuartierDomicilePere());
+            if (req.getNpiPere() != null && !req.getNpiPere().isBlank()) {
+                pere.setNpi(req.getNpiPere());
+            }
         }
 
         // ── Mère ────────────────────────────────────────────────
@@ -305,6 +308,9 @@ public class ActeNaissanceService {
                     req.getAdresseMere(), req.getPaysResidenceMere(),
                     req.getRegionDomicileMere(), req.getPrefectureDomicileMere(),
                     req.getCommuneDomicileMere(), req.getQuartierDomicileMere());
+            if (req.getNpiMere() != null && !req.getNpiMere().isBlank()) {
+                mere.setNpi(req.getNpiMere());
+            }
         }
 
         // ── Déclarant ───────────────────────────────────────────
@@ -316,6 +322,9 @@ public class ActeNaissanceService {
             declarant.setNom(req.getNomDeclarant());
             declarant.setSexe(req.getSexeDeclarant());
             declarant.setTelephone(req.getTelephoneDeclarant());
+            if (req.getNpiDeclarant() != null && !req.getNpiDeclarant().isBlank()) {
+                declarant.setNpi(req.getNpiDeclarant());
+            }
         }
 
         // ── Type d'acte ─────────────────────────────────────────
@@ -392,6 +401,18 @@ public class ActeNaissanceService {
                 .build();
 
         acteRepo.save(acte);
+
+        // Générer le NPI de l'enfant via le microservice, avec fallback sur le générateur local
+        Personne enfantSauve = acte.getEnfant();
+        if (enfantSauve != null && (enfantSauve.getNpi() == null || enfantSauve.getNpi().isBlank())) {
+            String npi = npiClientService.generateNpi(acte);
+            if (npi == null || npi.isBlank()) {
+                npi = npiGenerator.generate(acte);
+            }
+            enfantSauve.setNpi(npi);
+            personneRepo.save(enfantSauve);
+        }
+
         return ActeSummaryDTO.from(acte);
     }
 

@@ -32,7 +32,7 @@
 /* ── BOUTONS ──────────────────────────────────────────────────── */
 .btn-action {
   display: inline-flex; align-items: center; justify-content: center;
-  gap: 6px; padding: 0 18px; height: 36px; border-radius: 18px; border: none;
+  gap: 6px; padding: 0 20px; min-width: 100px; height: 36px; border-radius: 18px; border: none;
   font-size: 13px; font-weight: 600; font-family: inherit; letter-spacing: .2px;
   cursor: pointer; white-space: nowrap; box-sizing: border-box; flex-shrink: 0;
   transition: background .15s, box-shadow .15s, transform .15s;

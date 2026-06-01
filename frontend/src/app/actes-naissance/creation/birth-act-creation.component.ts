@@ -1173,6 +1173,7 @@ export class BirthActCreationComponent implements OnInit {
       rangEnfant:            naiss.rangEnfant,
       rangNaissanceMere:     naiss.rangNaissanceMere,
       // Père
+      npiPere:                 pere.hasNpi === 'oui' ? pere.npi : undefined,
       pereConnu:               pere.pereConnu,
       pereDecede:              pere.pereDecede,
       prenomPere:              pere.prenom,
@@ -1195,6 +1196,7 @@ export class BirthActCreationComponent implements OnInit {
       communeDomicilePere:     pere.commune,
       quartierDomicilePere:    pere.quartier,
       // Mère
+      npiMere:                  mere.hasNpi === 'oui' ? mere.npi : undefined,
       mereConnue:               mere.mereConnue,
       mereDecedee:              mere.mereDecedee,
       prenomMere:               mere.prenom,
@@ -1223,6 +1225,7 @@ export class BirthActCreationComponent implements OnInit {
       dateMariage:              mere.dateMariage,
       communeMariage:           mere.communeMariage,
       // Déclarant
+      npiDeclarant:        decl.hasNpi === 'oui' ? decl.npi : undefined,
       qualiteDeclarant:    decl.qualite,
       dateDeclaration:     decl.dateDeclaration,
       prenomDeclarant:     decl.prenom,

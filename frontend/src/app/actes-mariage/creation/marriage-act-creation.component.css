@@ -1,13 +1,13 @@
 /* ╔═══════════════════════════════════════════════════════════════════
-   ║  BIRTH ACT CREATION — Expert stepper design
+   ║  MARRIAGE ACT CREATION — même structure que birth-act, couleurs roses
    ╚═══════════════════════════════════════════════════════════════════ */
 
 :host {
-  --green:      #2e7d32;
-  --green-mid:  #388e3c;
-  --green-l:    #e8f5e9;
-  --green-pale: #f1f8f2;
-  --primary:    #00853F;
+  --green:      #880e4f;
+  --green-mid:  #c2185b;
+  --green-l:    #fce4ec;
+  --green-pale: #fff5f8;
+  --primary:    #880e4f;
   --border:     #e2e8f0;
   --bg:         #f4f6f9;
   --card:       #ffffff;
@@ -39,14 +39,14 @@
 
 /* ── En-tête page ───────────────────────────────────────────────── */
 .page-header {
-  background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 55%, #43a047 100%);
+  background: linear-gradient(135deg, #880e4f 0%, #c2185b 55%, #e91e63 100%);
   border-radius: 16px;
   padding: 22px 28px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  box-shadow: 0 8px 24px rgba(27,94,32,.3);
+  box-shadow: 0 8px 24px rgba(136,14,79,.3);
   position: relative;
   overflow: hidden;
 }
@@ -97,14 +97,13 @@
   font-weight: 600;
   flex-shrink: 0;
   border-radius: 10px !important;
-  padding: 0 22px !important;
-  min-width: 110px !important;
+  padding: 0 18px !important;
   height: 40px;
   backdrop-filter: blur(4px);
   transition: all .2s !important;
   letter-spacing: .02em;
 }
-.btn-retour mat-icon { font-size: 16px; width: 16px; height: 16px; margin-right: 6px; }
+.btn-retour mat-icon { font-size: 16px; width: 16px; height: 16px; margin-right: 4px; }
 .btn-retour:hover {
   background: rgba(255,255,255,.22) !important;
   border-color: rgba(255,255,255,.6) !important;
@@ -134,7 +133,6 @@
   overflow-x: auto;
 }
 
-/* Nœud d'étape */
 .step-node {
   display: flex;
   flex-direction: column;
@@ -143,10 +141,8 @@
   flex-shrink: 0;
   cursor: default;
 }
-
 .step-node--clickable { cursor: pointer; }
 
-/* Bulle */
 .step-bubble {
   width: 36px; height: 36px;
   border-radius: 50%;
@@ -157,19 +153,15 @@
   font-size: 13px; font-weight: 700;
   transition: all .22s cubic-bezier(.22,1,.36,1);
 }
-
 .done-icon { font-size: 16px; width: 16px; height: 16px; }
 
-/* Étape active */
 .step-node--active .step-bubble {
   background: var(--primary);
   border-color: var(--primary);
   color: #fff;
-  box-shadow: 0 0 0 4px rgba(0,133,63,.15);
+  box-shadow: 0 0 0 4px rgba(194,24,91,.15);
   width: 40px; height: 40px;
 }
-
-/* Étape complétée */
 .step-node--done .step-bubble {
   background: var(--green-l);
   border-color: var(--green-mid);
@@ -183,13 +175,9 @@
   white-space: nowrap;
   transition: color .2s, font-weight .2s;
 }
-.step-node--active .step-node-label {
-  color: var(--primary);
-  font-weight: 700;
-}
-.step-node--done .step-node-label { color: var(--green); }
+.step-node--active .step-node-label { color: var(--primary); font-weight: 700; }
+.step-node--done  .step-node-label  { color: var(--green); }
 
-/* Connecteur */
 .step-connector {
   flex: 1;
   height: 2px;
@@ -213,7 +201,6 @@
   gap: 24px;
   animation: fadeStep .25s cubic-bezier(.22,1,.36,1);
 }
-
 @keyframes fadeStep {
   from { opacity: 0; transform: translateX(8px); }
   to   { opacity: 1; transform: none; }
@@ -227,7 +214,6 @@
   padding-bottom: 20px;
   border-bottom: 1.5px solid var(--border);
 }
-
 .step-intro-icon {
   width: 48px; height: 48px;
   border-radius: 14px;
@@ -235,25 +221,11 @@
   flex-shrink: 0;
 }
 .step-intro-icon mat-icon { font-size: 26px; width: 26px; height: 26px; }
-
-.step-intro-title {
-  margin: 0 0 4px;
-  font-size: 1.05rem;
-  font-weight: 800;
-  color: var(--txt);
-}
-.step-intro-sub {
-  margin: 0;
-  font-size: .83rem;
-  color: var(--txt-3);
-}
+.step-intro-title { margin: 0 0 4px; font-size: 1.05rem; font-weight: 800; color: var(--txt); }
+.step-intro-sub   { margin: 0; font-size: .83rem; color: var(--txt-3); }
 
 /* ── Section de champs ──────────────────────────────────────────── */
-.fields-section {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
+.fields-section { display: flex; flex-direction: column; gap: 14px; }
 
 .fields-section-title {
   margin: 0 0 2px;
@@ -267,54 +239,26 @@
 }
 
 /* ── Grilles ────────────────────────────────────────────────────── */
-.fields-grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0 16px;
-}
-
-.fields-grid-3 {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 0 16px;
-}
-
+.fields-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+.fields-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0 16px; }
 .full-width { width: 100%; }
 
 /* ── Champs radio ───────────────────────────────────────────────── */
-.radio-field-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 12px 0 4px;
-}
-
-.mat-label-custom {
-  font-size: 12px;
-  font-weight: 500;
-  color: rgba(0,0,0,.6);
-}
-
+.radio-field-wrap { display: flex; flex-direction: column; gap: 10px; padding: 12px 0 4px; }
+.mat-label-custom { font-size: 12px; font-weight: 500; color: rgba(0,0,0,.6); }
 .req { color: #c62828; margin-left: 2px; }
-
-.radio-row {
-  display: flex;
-  gap: 20px;
-  align-items: center;
-}
-
-.radio-col {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
+.radio-row  { display: flex; gap: 20px; align-items: center; }
+.radio-col  { display: flex; flex-direction: column; gap: 6px; }
 
 /* ══════════════════════════════════════════════════════════════════
    LAYOUT COLONNE UNIQUE (fieldsets empilés)
 ══════════════════════════════════════════════════════════════════ */
-.form-columns {
-  display: flex;
-  flex-direction: column;
+.form-columns { display: flex; flex-direction: column; gap: 20px; }
+
+/* ── Layout 2 colonnes (époux / épouse / témoins) ───────────────── */
+.form-columns-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 20px;
 }
 
@@ -340,7 +284,7 @@
   margin: 0;
   width: 100%;
   box-sizing: border-box;
-  background: linear-gradient(135deg, rgba(0,133,63,.06) 0%, rgba(0,133,63,.02) 100%);
+  background: linear-gradient(135deg, rgba(194,24,91,.06) 0%, rgba(194,24,91,.02) 100%);
   border-bottom: 1.5px solid var(--border);
 }
 
@@ -358,117 +302,49 @@
 }
 
 /* ── Ligne de champ ─────────────────────────────────────────────── */
-.field-row {
-  padding: 0 20px;
-  margin-top: 8px;
-}
+.field-row { padding: 0 20px; margin-top: 8px; }
+.field-row:first-of-type { margin-top: 4em !important; }
 
-.field-row:first-of-type {
-  margin-top: 4em !important;
-}
-
-/* Variante : deux colonnes côte à côte */
-.field-row--split {
-  display: flex;
-  gap: 24px;
-  align-items: flex-start;
-}
-
-.field-row--split > * {
-  flex: 1;
-}
-
+.field-row--split { display: flex; gap: 24px; align-items: flex-start; }
+.field-row--split > * { flex: 1; }
 .field-full { width: 100%; }
 
 /* ── Champs compacts pleine largeur (override MDC) ──────────────── */
-.form-fieldset .mat-mdc-form-field {
-  width: 100%;
-}
-
-.form-fieldset .mat-mdc-text-field-wrapper {
-  padding-top: 0 !important;
-}
-
+.form-fieldset .mat-mdc-form-field { width: 100%; }
+.form-fieldset .mat-mdc-text-field-wrapper { padding-top: 0 !important; }
 .form-fieldset .mat-mdc-form-field-infix {
   padding-top: 6px !important;
   padding-bottom: 6px !important;
   min-height: 38px !important;
 }
-
-.form-fieldset .mdc-text-field--outlined {
-  --mdc-outlined-text-field-container-height: 42px;
-}
-
-.form-fieldset .mat-mdc-floating-label {
-  top: 21px !important;
-}
-
-.form-fieldset .mdc-floating-label--float-above {
-  transform: translateY(-24px) scale(0.75) !important;
-}
-
-.form-fieldset .mat-mdc-form-field-subscript-wrapper {
-  height: 14px;
-}
-
+.form-fieldset .mdc-text-field--outlined { --mdc-outlined-text-field-container-height: 42px; }
+.form-fieldset .mat-mdc-floating-label { top: 21px !important; }
+.form-fieldset .mdc-floating-label--float-above { transform: translateY(-24px) scale(0.75) !important; }
+.form-fieldset .mat-mdc-form-field-subscript-wrapper { height: 14px; }
 .form-fieldset input.mat-mdc-input-element,
-.form-fieldset .mat-mdc-select {
-  font-size: 13.5px;
-}
+.form-fieldset .mat-mdc-select { font-size: 13.5px; }
 
 /* ── Bloc radio ─────────────────────────────────────────────────── */
-.radio-block {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 4px 0 6px;
-}
-
-.radio-block-label {
-  font-size: 12.5px;
-  font-weight: 500;
-  color: rgba(0,0,0,.6);
-  line-height: 1;
-}
-
-.radio-inline {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 24px;
-}
+.radio-block { display: flex; flex-direction: column; gap: 8px; padding: 4px 0 6px; }
+.radio-block-label { font-size: 12.5px; font-weight: 500; color: rgba(0,0,0,.6); line-height: 1; }
+.radio-inline { display: flex; flex-wrap: wrap; gap: 6px 24px; }
 
 /* ── Erreur ─────────────────────────────────────────────────────── */
-.field-error {
-  font-size: 11.5px;
-  color: #f44336;
-  margin-top: 3px;
-}
+.field-error { font-size: 11.5px; color: #f44336; margin-top: 3px; }
 
-/* ── Champ conditionnel (apparition fluide) ─────────────────────── */
-.conditional-field {
-  animation: slideIn .22s cubic-bezier(.22,1,.36,1);
-}
+/* ── Datepicker toggle ──────────────────────────────────────────── */
+.form-fieldset .mat-datepicker-toggle button,
+.mat-datepicker-toggle button { color: var(--primary) !important; }
 
-@keyframes slideIn {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: none; }
+/* ── Bouton Suivant / Enregistrer ───────────────────────────────── */
+.mat-mdc-raised-button.mat-primary,
+.mat-raised-button.mat-primary {
+  background-color: var(--primary) !important;
 }
-
-/* ── Bannière confirmation ──────────────────────────────────────── */
-.confirm-banner {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  padding: 16px 20px;
-  background: var(--green-l);
-  border: 1px solid #a5d6a7;
-  border-left: 4px solid var(--green);
-  border-radius: 10px;
-  color: var(--green);
+.mat-mdc-raised-button.mat-primary:hover,
+.mat-raised-button.mat-primary:hover {
+  background-color: #c2185b !important;
 }
-.confirm-banner mat-icon { font-size: 22px; width: 22px; height: 22px; flex-shrink: 0; margin-top: 2px; }
-.confirm-banner strong { display: block; font-size: .9rem; margin-bottom: 4px; }
-.confirm-banner p { margin: 0; font-size: .82rem; opacity: .85; }
 
 /* ══════════════════════════════════════════════════════════════════
    PIED DE PAGE — NAVIGATION
@@ -481,12 +357,7 @@
   border-top: 1.5px solid var(--border);
   background: #fafbfc;
 }
-
-.footer-nav {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+.footer-nav { display: flex; align-items: center; gap: 10px; }
 
 .btn-cancel {
   color: #64748b !important;
@@ -500,20 +371,13 @@
   letter-spacing: .02em;
 }
 .btn-cancel mat-icon { font-size: 18px; width: 18px; height: 18px; margin-right: 4px; color: #94a3b8; transition: color .2s; }
-.btn-cancel:hover {
-  color: #dc2626 !important;
-  border-color: #fca5a5 !important;
-  background: #fff5f5 !important;
-}
+.btn-cancel:hover { color: #dc2626 !important; border-color: #fca5a5 !important; background: #fff5f5 !important; }
 .btn-cancel:hover mat-icon { color: #dc2626; }
 
-/* ── Datepicker toggle ──────────────────────────────────────────── */
-.form-fieldset .mat-datepicker-toggle button,
-.mat-datepicker-toggle button {
-  color: var(--primary) !important;
-}
-
 /* ── Responsive ─────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .form-columns-grid { grid-template-columns: 1fr; }
+}
 @media (max-width: 768px) {
   .creation-page { padding: 16px; }
   .step-body { padding: 20px 20px 16px; }
@@ -523,65 +387,3 @@
   .fields-grid-3 { grid-template-columns: 1fr 1fr; }
   .step-track { padding: 16px 20px 14px; }
 }
-
-@media (max-width: 480px) {
-  .fields-grid-3 { grid-template-columns: 1fr; }
-  .page-header { flex-direction: column; align-items: flex-start; }
-}
-
-/* ── Lieu de naissance en ligne ─────────────────────────────────── */
-.lieu-row {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: flex-start;
-  padding: 0 20px;
-  margin-top: 8px;
-}
-
-.lieu-row mat-form-field {
-  flex: 1;
-  min-width: 130px;
-}
-
-/* ── Bannière acte manquant ─────────────────────────────────────── */
-.acte-manquant-banner {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 11px 20px;
-  background: #fffbeb;
-  border-bottom: 2px solid #fde68a;
-  color: #92400e;
-  font-size: .83rem;
-  line-height: 1.5;
-  animation: slideIn .22s ease;
-}
-.acte-manquant-banner mat-icon {
-  font-size: 20px; width: 20px; height: 20px;
-  flex-shrink: 0; color: #f59e0b;
-}
-.acte-manquant-banner strong { font-weight: 700; }
-
-/* ── Alerte délai dressage > 6 mois ────────────────────────────── */
-.delai-warning {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  margin-top: 16px;
-  padding: 14px 18px;
-  background: #fff7ed;
-  border: 1px solid #fed7aa;
-  border-left: 4px solid #f97316;
-  border-radius: 10px;
-  color: #9a3412;
-  animation: slideIn .22s ease;
-}
-.delai-warning mat-icon {
-  font-size: 22px; width: 22px; height: 22px;
-  flex-shrink: 0; margin-top: 1px; color: #f97316;
-}
-.delai-warning div { display: flex; flex-direction: column; gap: 4px; }
-.delai-warning strong { font-size: .88rem; display: block; }
-.delai-warning span { font-size: .82rem; line-height: 1.5; }

@@ -38,6 +38,7 @@ export interface ActeNaissanceDTO {
   rangNaissanceMere?:     number | null;
 
   // ── Père ──────────────────────────────────────────────
+  npiPere?:                 string;
   pereConnu?:               string;
   pereDecede?:              string;
   prenomPere?:              string;
@@ -61,6 +62,7 @@ export interface ActeNaissanceDTO {
   quartierDomicilePere?:    string;
 
   // ── Mère ──────────────────────────────────────────────
+  npiMere?:                  string;
   mereConnue?:               string;
   mereDecedee?:              string;
   prenomMere?:               string;
@@ -90,6 +92,7 @@ export interface ActeNaissanceDTO {
   communeMariage?:           string;
 
   // ── Déclarant (déclaration) ────────────────────────────
+  npiDeclarant?:          string;
   qualiteDeclarant?:      string;
   dateDeclaration?:       string | null;
   prenomDeclarant?:       string;
@@ -480,6 +483,181 @@ export interface ActeNaissanceDetail {
   createdAt?:               string;
 }
 
+// ══════════════════════════════════════════════════════════════════
+//  MARIAGE — DTOs
+// ══════════════════════════════════════════════════════════════════
+
+export interface ActeMariageDTO {
+  typeMariage?:      string;
+  dateMariage?:      string | null;
+  heureMariage?:     string;
+  communeMariage?:   string;
+  lieuMariage?:      string;
+  regimeMatrimonial?: string;
+  // Époux
+  npiEpoux?:          string;
+  prenomEpoux?:       string;
+  nomEpoux?:          string;
+  dateNaissanceEpoux?: string | null;
+  communeNaissanceEpoux?: string;
+  nationaliteEpoux?:  string;
+  professionEpoux?:   string;
+  telephoneEpoux?:    string;
+  etatCivilAntEpoux?: string;
+  adresseEpoux?:      string;
+  communeDomicileEpoux?:  string;
+  quartierDomicileEpoux?: string;
+  // Parents époux
+  prenomPereEpoux?:       string;
+  nomPereEpoux?:          string;
+  professionPereEpoux?:   string;
+  nationalitePereEpoux?:  string;
+  prenomMereEpoux?:       string;
+  nomMereEpoux?:          string;
+  professionMereEpoux?:   string;
+  nationaliteMereEpoux?:  string;
+  // Épouse
+  npiEpouse?:          string;
+  prenomEpouse?:       string;
+  nomEpouse?:          string;
+  dateNaissanceEpouse?: string | null;
+  communeNaissanceEpouse?: string;
+  nationaliteEpouse?:  string;
+  professionEpouse?:   string;
+  telephoneEpouse?:    string;
+  etatCivilAntEpouse?: string;
+  adresseEpouse?:      string;
+  communeDomicileEpouse?:  string;
+  quartierDomicileEpouse?: string;
+  // Parents épouse
+  prenomPereEpouse?:      string;
+  nomPereEpouse?:         string;
+  professionPereEpouse?:  string;
+  nationalitePereEpouse?: string;
+  prenomMereEpouse?:      string;
+  nomMereEpouse?:         string;
+  professionMereEpouse?:  string;
+  nationaliteMereEpouse?: string;
+  // Témoin 1
+  npiTemoin1?:        string;
+  prenomTemoin1?:     string;
+  nomTemoin1?:        string;
+  sexeTemoin1?:       string;
+  professionTemoin1?: string;
+  telephoneTemoin1?:  string;
+  adresseTemoin1?:    string;
+  // Témoin 2
+  npiTemoin2?:        string;
+  prenomTemoin2?:     string;
+  nomTemoin2?:        string;
+  sexeTemoin2?:       string;
+  professionTemoin2?: string;
+  telephoneTemoin2?:  string;
+  adresseTemoin2?:    string;
+  // Officier / Déclarant
+  prenomDeclarant?:    string;
+  nomDeclarant?:       string;
+  qualiteDeclarant?:   string;
+  dateDeclaration?:    string | null;
+  signatureDeclarant?: string;
+  // Inscription
+  pointCollecte?:  string;
+  dateDressage?:   string | null;
+  heureDressage?:  string;
+  actionsFaire?:   ActionFaire;
+}
+
+export interface ActeMariageDetail {
+  id:                  string;
+  source?:             string;
+  typeActe?:           string;
+  statut?:             string;
+  actionsFaire?:       string;
+  numeroActe?:         string;
+  anneeRegistre?:      string;
+  feuillet?:           string;
+  // Mariage
+  dateMariage?:        string;
+  heureMariage?:       string;
+  typeMariage?:        string;
+  lieuMariage?:        string;
+  regimeMatrimonial?:  string;
+  etatCivilAntEpoux?:  string;
+  etatCivilAntEpouse?: string;
+  // Époux
+  npiEpoux?:           string;
+  prenomEpoux?:        string;
+  nomEpoux?:           string;
+  dateNaissanceEpoux?: string;
+  communeNaissanceEpoux?: string;
+  nationaliteEpoux?:   string;
+  professionEpoux?:    string;
+  telephoneEpoux?:     string;
+  adresseEpoux?:       string;
+  communeDomicileEpoux?:  string;
+  quartierDomicileEpoux?: string;
+  // Parents époux
+  prenomPereEpoux?:       string;
+  nomPereEpoux?:          string;
+  professionPereEpoux?:   string;
+  nationalitePereEpoux?:  string;
+  prenomMereEpoux?:       string;
+  nomMereEpoux?:          string;
+  professionMereEpoux?:   string;
+  nationaliteMereEpoux?:  string;
+  // Épouse
+  npiEpouse?:          string;
+  prenomEpouse?:       string;
+  nomEpouse?:          string;
+  dateNaissanceEpouse?: string;
+  communeNaissanceEpouse?: string;
+  nationaliteEpouse?:  string;
+  professionEpouse?:   string;
+  telephoneEpouse?:    string;
+  adresseEpouse?:      string;
+  communeDomicileEpouse?:  string;
+  quartierDomicileEpouse?: string;
+  // Parents épouse
+  prenomPereEpouse?:      string;
+  nomPereEpouse?:         string;
+  professionPereEpouse?:  string;
+  nationalitePereEpouse?: string;
+  prenomMereEpouse?:      string;
+  nomMereEpouse?:         string;
+  professionMereEpouse?:  string;
+  nationaliteMereEpouse?: string;
+  // Témoin 1
+  npiTemoin1?:         string;
+  prenomTemoin1?:      string;
+  nomTemoin1?:         string;
+  sexeTemoin1?:        string;
+  professionTemoin1?:  string;
+  telephoneTemoin1?:   string;
+  adresseTemoin1?:     string;
+  // Témoin 2
+  npiTemoin2?:         string;
+  prenomTemoin2?:      string;
+  nomTemoin2?:         string;
+  sexeTemoin2?:        string;
+  professionTemoin2?:  string;
+  telephoneTemoin2?:   string;
+  adresseTemoin2?:     string;
+  // Déclarant
+  prenomDeclarant?:    string;
+  nomDeclarant?:       string;
+  dateDeclaration?:    string;
+  signatureDeclarant?: string;
+  // Inscription
+  dateDressage?:       string;
+  heureDressage?:      string;
+  pointCollecte?:      string;
+  // Méta
+  commune?:            string;
+  agentNomComplet?:    string;
+  validateurNomComplet?: string;
+  createdAt?:          string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ActeNaissanceService {
   private readonly base   = `${environment.apiURL}/actes/naissance`;
@@ -580,6 +758,29 @@ export class ActeNaissanceService {
       ...payload,
       typeCreation: 'TRANSCRIPTION',
     });
+  }
+
+  /** Enregistrer une déclaration de mariage */
+  createDeclarationMariage(payload: ActeMariageDTO): Observable<ActeNaissanceSummary> {
+    return this.http.post<ActeNaissanceSummary>(`${environment.apiURL}/actes/mariage`, {
+      ...payload,
+      typeCreation: 'DECLARATION',
+    });
+  }
+
+  /** Consulter le détail complet d'un acte de mariage */
+  getByIdMariage(id: string): Observable<ActeMariageDetail> {
+    return this.http.get<ActeMariageDetail>(`${environment.apiURL}/actes/mariage/${id}`);
+  }
+
+  /** Valider un acte de mariage */
+  validerMariage(id: string): Observable<ActeNaissanceSummary> {
+    return this.http.put<ActeNaissanceSummary>(`${environment.apiURL}/actes/mariage/${id}/valider`, {});
+  }
+
+  /** Supprimer logiquement un acte de mariage */
+  deleteMariage(id: string): Observable<void> {
+    return this.http.delete<void>(`${environment.apiURL}/actes/mariage/${id}`);
   }
 
   private buildParams(params: ActeNaissanceSearchParams): HttpParams {

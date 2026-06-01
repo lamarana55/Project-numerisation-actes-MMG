@@ -1,6 +1,7 @@
 package gov.ravec.backend.dto;
 
 import gov.ravec.backend.entities.ActeDeces;
+import gov.ravec.backend.entities.ActeMariage;
 import gov.ravec.backend.entities.ActeNaissance;
 import lombok.*;
 
@@ -77,6 +78,30 @@ public class ActeSummaryDTO {
                 .agentNomComplet(a.getAgent() != null ? a.getAgent().getNomComplet() : null)
                 .createdAt(a.getCreatedAt() != null ? a.getCreatedAt().toString() : null)
                 .npi(a.getEnfant() != null ? a.getEnfant().getNpi() : null)
+                .build();
+    }
+
+    // ── Factory : depuis ActeMariage ─────────────────────────────
+    public static ActeSummaryDTO from(ActeMariage a) {
+        String srcName = a.getSource() != null ? a.getSource().name() : null;
+        return ActeSummaryDTO.builder()
+                .id(a.getId())
+                .typeCreation(srcName)
+                .source(srcName)
+                .typeActe("mariage")
+                .prenom(a.getEpoux() != null ? a.getEpoux().getPrenom() : null)
+                .nom(a.getEpoux() != null ? a.getEpoux().getNom() : null)
+                .prenomMere(a.getEpouse() != null ? a.getEpouse().getPrenom() : null)
+                .nomMere(a.getEpouse() != null ? a.getEpouse().getNom() : null)
+                .dateNaissance(a.getDateMariage() != null ? a.getDateMariage().toString() : null)
+                .dateDressage(a.getDateDressage() != null ? a.getDateDressage().toString() : null)
+                .actionsFaire(a.getActionsFaire() != null ? a.getActionsFaire().name() : null)
+                .statut(a.getStatut() != null ? a.getStatut().name() : null)
+                .numeroActe(a.getNumeroActe())
+                .commune(a.getCommune() != null ? a.getCommune().getNom() : null)
+                .agentNomComplet(a.getAgent() != null ? a.getAgent().getNomComplet() : null)
+                .createdAt(a.getCreatedAt() != null ? a.getCreatedAt().toString() : null)
+                .npi(a.getEpoux() != null ? a.getEpoux().getNpi() : null)
                 .build();
     }
 

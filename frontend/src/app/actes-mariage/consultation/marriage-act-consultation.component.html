@@ -1,0 +1,358 @@
+<div class="consult-page">
+
+  <!-- ── En-tête page ─────────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="header-icon"><mat-icon>favorite</mat-icon></div>
+      <div>
+        <h1 class="page-title">Acte de mariage</h1>
+        <p class="page-subtitle">Consultation du détail de l'acte</p>
+      </div>
+    </div>
+    <div class="page-header-actions">
+      <button class="btn-action btn-action--outline" (click)="retour()">
+        <mat-icon>arrow_back_ios</mat-icon>
+        <span>Retour</span>
+      </button>
+      <button class="btn-action btn-action--validate" (click)="valider()"
+              *ngIf="acte && canValider" [disabled]="isValidating">
+        <mat-spinner *ngIf="isValidating" diameter="15"></mat-spinner>
+        <mat-icon *ngIf="!isValidating">verified</mat-icon>
+        <span>{{ isValidating ? 'Validation…' : 'Valider l\'acte' }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Chargement ────────────────────────────────────────────── -->
+  <div class="state-box" *ngIf="isLoading">
+    <mat-spinner diameter="36"></mat-spinner>
+    <span>Chargement de l'acte…</span>
+  </div>
+
+  <!-- ── Erreur ─────────────────────────────────────────────────── -->
+  <div class="state-box state-box--error" *ngIf="hasError && !isLoading">
+    <mat-icon>error_outline</mat-icon>
+    <span>Impossible de charger cet acte.</span>
+    <button class="btn-action btn-action--outline" (click)="retour()">Retour</button>
+  </div>
+
+  <!-- ── Contenu ───────────────────────────────────────────────── -->
+  <div class="acte-body" *ngIf="acte && !isLoading && !hasError">
+
+    <!-- Bandeau statut -->
+    <div [class]="bannerClass">
+      <mat-icon>{{ bannerIcon }}</mat-icon>
+      <span>{{ statutLabel }}</span>
+      <span class="source-badge">{{ sourceLabel }}</span>
+      <span class="meta-info" *ngIf="acte.agentNomComplet">Agent : {{ acte.agentNomComplet }}</span>
+      <span class="meta-info" *ngIf="acte.validateurNomComplet">Validé par : {{ acte.validateurNomComplet }}</span>
+    </div>
+
+    <!-- Onglets -->
+    <div class="doc-tabs">
+      <button class="doc-tab" [class.doc-tab--active]="activeTab === 'acte'" (click)="setTab('acte')">
+        <mat-icon>description</mat-icon> Acte de mariage
+      </button>
+      <button class="doc-tab" [class.doc-tab--active]="activeTab === 'copie'" (click)="setTab('copie')">
+        <mat-icon>content_copy</mat-icon> Copie intégrale
+      </button>
+    </div>
+
+    <!-- ══ DOCUMENT 1 — ACTE DE MARIAGE ══════════════════════════════ -->
+    <div class="acte-document" *ngIf="activeTab === 'acte'">
+      <div class="doc-filigrane"></div>
+      <div class="doc-inner">
+
+        <div class="doc-header">
+          <div class="hd-left">
+            <p class="hd-republic">RÉPUBLIQUE DE GUINÉE</p>
+            <p class="hd-devise">Travail – Justice – Solidarité</p>
+            <div class="hd-location">
+              <p *ngIf="acte.commune">Commune de {{ fmtCommune(acte.commune) }}</p>
+              <p>Centre d'état civil de {{ fmtCommune(acte.commune) }}</p>
+            </div>
+          </div>
+          <div class="hd-center">
+            <img src="/assets/armoiries_guinee.png" class="hd-armoirie" alt="Armoiries de Guinée"/>
+          </div>
+          <div class="hd-right">
+            <p class="hd-acte-title">Acte de mariage</p>
+            <p class="hd-copie-sub">{{ fmtTypeMariage(acte.typeMariage) }}</p>
+            <p class="hd-registre" *ngIf="acte.dateMariage">Registre de l'année {{ acte.dateMariage.substring(0,4) }}</p>
+            <p class="hd-numero" *ngIf="acte.numeroActe">N° {{ acte.numeroActe }}</p>
+          </div>
+        </div>
+
+        <div class="tricolor-bar"><span class="tc-r"></span><span class="tc-y"></span><span class="tc-g"></span></div>
+
+        <!-- MARIAGE -->
+        <div class="doc-section">
+          <h3 class="section-title">MARIAGE</h3>
+          <div class="field-row">
+            <span class="fl-label">Date du mariage</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ fmtDate(acte.dateMariage) }}{{ acte.heureMariage ? ' à ' + acte.heureMariage : '' }}</span>
+          </div>
+          <div class="field-row">
+            <span class="fl-label">Type de mariage</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ fmtTypeMariage(acte.typeMariage) }}</span>
+          </div>
+          <div class="field-row" *ngIf="acte.lieuMariage">
+            <span class="fl-label">Lieu</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ acte.lieuMariage }}</span>
+          </div>
+          <div class="field-row">
+            <span class="fl-label">Commune</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ fmtCommune(acte.commune) }}</span>
+          </div>
+          <div class="field-row" *ngIf="acte.regimeMatrimonial">
+            <span class="fl-label">Régime matrimonial</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ fmtRegime(acte.regimeMatrimonial) }}</span>
+          </div>
+        </div>
+
+        <!-- ÉPOUX -->
+        <div class="doc-section">
+          <h3 class="section-title">ÉPOUX</h3>
+          <div class="field-row" *ngIf="acte.npiEpoux">
+            <span class="fl-label">NPI</span><span class="fl-sep">:</span>
+            <span class="fl-value fl-npi">{{ acte.npiEpoux }}</span>
+          </div>
+          <div class="field-row">
+            <span class="fl-label">Prénoms et nom</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ acte.prenomEpoux }} {{ acte.nomEpoux }}</span>
+          </div>
+          <div class="field-row" *ngIf="acte.dateNaissanceEpoux">
+            <span class="fl-label">Date de naissance</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ fmtDate(acte.dateNaissanceEpoux) }}</span>
+          </div>
+          <div class="field-row" *ngIf="acte.nationaliteEpoux">
+            <span class="fl-label">Nationalité</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ getNatLabel(acte.nationaliteEpoux, 'M') }}</span>
+          </div>
+          <div class="field-row" *ngIf="acte.professionEpoux">
+            <span class="fl-label">Profession</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ acte.professionEpoux }}</span>
+          </div>
+          <div class="field-row" *ngIf="acte.adresseEpoux || acte.communeDomicileEpoux">
+            <span class="fl-label">Domicile</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ acte.adresseEpoux }}{{ acte.communeDomicileEpoux ? ', ' + fmtCommune(acte.communeDomicileEpoux) : '' }}</span>
+          </div>
+          <div class="field-row" *ngIf="acte.etatCivilAntEpoux">
+            <span class="fl-label">État civil antérieur</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ fmtEtatCivil(acte.etatCivilAntEpoux) }}</span>
+          </div>
+        </div>
+
+        <!-- ÉPOUSE -->
+        <div class="doc-section">
+          <h3 class="section-title">ÉPOUSE</h3>
+          <div class="field-row" *ngIf="acte.npiEpouse">
+            <span class="fl-label">NPI</span><span class="fl-sep">:</span>
+            <span class="fl-value fl-npi">{{ acte.npiEpouse }}</span>
+          </div>
+          <div class="field-row">
+            <span class="fl-label">Prénoms et nom</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ acte.prenomEpouse }} {{ acte.nomEpouse }}</span>
+          </div>
+          <div class="field-row" *ngIf="acte.dateNaissanceEpouse">
+            <span class="fl-label">Date de naissance</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ fmtDate(acte.dateNaissanceEpouse) }}</span>
+          </div>
+          <div class="field-row" *ngIf="acte.nationaliteEpouse">
+            <span class="fl-label">Nationalité</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ getNatLabel(acte.nationaliteEpouse, 'F') }}</span>
+          </div>
+          <div class="field-row" *ngIf="acte.professionEpouse">
+            <span class="fl-label">Profession</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ acte.professionEpouse }}</span>
+          </div>
+          <div class="field-row" *ngIf="acte.adresseEpouse || acte.communeDomicileEpouse">
+            <span class="fl-label">Domicile</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ acte.adresseEpouse }}{{ acte.communeDomicileEpouse ? ', ' + fmtCommune(acte.communeDomicileEpouse) : '' }}</span>
+          </div>
+          <div class="field-row" *ngIf="acte.etatCivilAntEpouse">
+            <span class="fl-label">État civil antérieur</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ fmtEtatCivil(acte.etatCivilAntEpouse) }}</span>
+          </div>
+        </div>
+
+        <!-- TÉMOINS -->
+        <div class="doc-section" *ngIf="acte.prenomTemoin1 || acte.nomTemoin1">
+          <h3 class="section-title">TÉMOINS</h3>
+          <div class="field-row" *ngIf="acte.prenomTemoin1 || acte.nomTemoin1">
+            <span class="fl-label">Premier témoin</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ acte.prenomTemoin1 }} {{ acte.nomTemoin1 }}{{ acte.professionTemoin1 ? ', ' + acte.professionTemoin1 : '' }}</span>
+          </div>
+          <div class="field-row" *ngIf="acte.prenomTemoin2 || acte.nomTemoin2">
+            <span class="fl-label">Deuxième témoin</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ acte.prenomTemoin2 }} {{ acte.nomTemoin2 }}{{ acte.professionTemoin2 ? ', ' + acte.professionTemoin2 : '' }}</span>
+          </div>
+        </div>
+
+        <!-- CLÔTURE -->
+        <div class="closing-section">
+          <p class="closing-text">
+            Le présent acte a été dressé le {{ fmtDate(acte.dateDressage) }}{{ acte.heureDressage ? ' à ' + acte.heureDressage : '' }},
+            par nous, officier de l'état civil de la commune de {{ fmtCommune(acte.commune) }}.
+          </p>
+          <p class="closing-dresse" *ngIf="acte.prenomDeclarant || acte.nomDeclarant">
+            Dressé par : <strong>{{ acte.prenomDeclarant }} {{ acte.nomDeclarant }}</strong>
+          </p>
+        </div>
+
+        <!-- Pied de document -->
+        <div class="doc-footer">
+          <div class="qr-zone">
+            <img *ngIf="qrDataUrl" [src]="qrDataUrl" class="qr-img" alt="QR Code">
+            <div *ngIf="!qrDataUrl" class="qr-placeholder">
+              <mat-icon>qr_code_2</mat-icon>
+            </div>
+            <p class="qr-npi" *ngIf="acte.npiEpoux">NPI : {{ acte.npiEpoux }}</p>
+          </div>
+          <div class="footer-sig">
+            <div class="stamp-circle">
+              <div class="stamp-inner">
+                <span class="stamp-top">ÉTAT CIVIL</span>
+                <span class="stamp-mid">GUINÉE</span>
+                <span class="stamp-bot">MARIAGE</span>
+              </div>
+            </div>
+          </div>
+          <div class="footer-cert">
+            <p>Certifié conforme au registre de l'état civil</p>
+            <p *ngIf="acte.validateurNomComplet">Validé par : {{ acte.validateurNomComplet }}</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ DOCUMENT 2 — COPIE INTÉGRALE ══════════════════════════════ -->
+    <div class="acte-document" *ngIf="activeTab === 'copie'">
+      <div class="doc-filigrane"></div>
+      <div class="doc-inner">
+
+        <div class="doc-header">
+          <div class="hd-left">
+            <p class="hd-republic">RÉPUBLIQUE DE GUINÉE</p>
+            <p class="hd-devise">Travail – Justice – Solidarité</p>
+            <div class="hd-location">
+              <p *ngIf="acte.commune">Commune de {{ fmtCommune(acte.commune) }}</p>
+            </div>
+          </div>
+          <div class="hd-center">
+            <img src="/assets/armoiries_guinee.png" class="hd-armoirie" alt="Armoiries de Guinée"/>
+          </div>
+          <div class="hd-right">
+            <p class="hd-acte-title">Copie intégrale</p>
+            <p class="hd-copie-sub">Acte de mariage</p>
+            <p class="hd-numero" *ngIf="acte.numeroActe">N° {{ acte.numeroActe }}</p>
+          </div>
+        </div>
+
+        <div class="tricolor-bar"><span class="tc-r"></span><span class="tc-y"></span><span class="tc-g"></span></div>
+
+        <div class="doc-section">
+          <h3 class="section-title">MARIAGE</h3>
+          <div class="field-row">
+            <span class="fl-label">Date du mariage</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ fmtDate(acte.dateMariage) }}</span>
+          </div>
+          <div class="field-row">
+            <span class="fl-label">Type</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ fmtTypeMariage(acte.typeMariage) }}</span>
+          </div>
+          <div class="field-row">
+            <span class="fl-label">Commune</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ fmtCommune(acte.commune) }}</span>
+          </div>
+          <div class="field-row" *ngIf="acte.regimeMatrimonial">
+            <span class="fl-label">Régime matrimonial</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ fmtRegime(acte.regimeMatrimonial) }}</span>
+          </div>
+        </div>
+
+        <div class="doc-section">
+          <h3 class="section-title">ÉPOUX</h3>
+          <div class="field-row">
+            <span class="fl-label">Prénoms et nom</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ acte.prenomEpoux }} {{ acte.nomEpoux }}</span>
+          </div>
+          <div class="field-row" *ngIf="acte.dateNaissanceEpoux">
+            <span class="fl-label">Né le</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ fmtDate(acte.dateNaissanceEpoux) }}{{ acte.communeNaissanceEpoux ? ' à ' + fmtCommune(acte.communeNaissanceEpoux) : '' }}</span>
+          </div>
+          <div class="field-row" *ngIf="acte.professionEpoux">
+            <span class="fl-label">Profession</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ acte.professionEpoux }}</span>
+          </div>
+          <div class="field-row" *ngIf="acte.etatCivilAntEpoux">
+            <span class="fl-label">État civil antérieur</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ fmtEtatCivil(acte.etatCivilAntEpoux) }}</span>
+          </div>
+        </div>
+
+        <div class="doc-section">
+          <h3 class="section-title">ÉPOUSE</h3>
+          <div class="field-row">
+            <span class="fl-label">Prénoms et nom</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ acte.prenomEpouse }} {{ acte.nomEpouse }}</span>
+          </div>
+          <div class="field-row" *ngIf="acte.dateNaissanceEpouse">
+            <span class="fl-label">Née le</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ fmtDate(acte.dateNaissanceEpouse) }}{{ acte.communeNaissanceEpouse ? ' à ' + fmtCommune(acte.communeNaissanceEpouse) : '' }}</span>
+          </div>
+          <div class="field-row" *ngIf="acte.professionEpouse">
+            <span class="fl-label">Profession</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ acte.professionEpouse }}</span>
+          </div>
+          <div class="field-row" *ngIf="acte.etatCivilAntEpouse">
+            <span class="fl-label">État civil antérieur</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ fmtEtatCivil(acte.etatCivilAntEpouse) }}</span>
+          </div>
+        </div>
+
+        <div class="doc-section" *ngIf="acte.prenomTemoin1 || acte.prenomTemoin2">
+          <h3 class="section-title">TÉMOINS</h3>
+          <div class="field-row" *ngIf="acte.prenomTemoin1 || acte.nomTemoin1">
+            <span class="fl-label">Témoin 1</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ acte.prenomTemoin1 }} {{ acte.nomTemoin1 }}{{ acte.telephoneTemoin1 ? ' — ' + acte.telephoneTemoin1 : '' }}</span>
+          </div>
+          <div class="field-row" *ngIf="acte.prenomTemoin2 || acte.nomTemoin2">
+            <span class="fl-label">Témoin 2</span><span class="fl-sep">:</span>
+            <span class="fl-value">{{ acte.prenomTemoin2 }} {{ acte.nomTemoin2 }}{{ acte.telephoneTemoin2 ? ' — ' + acte.telephoneTemoin2 : '' }}</span>
+          </div>
+        </div>
+
+        <div class="closing-section">
+          <p class="closing-text">
+            Délivré à {{ fmtCommune(acte.commune) }}, le {{ fmtDate(acte.dateDressage) }}.
+          </p>
+        </div>
+
+        <div class="doc-footer">
+          <div class="qr-zone">
+            <img *ngIf="qrDataUrl" [src]="qrDataUrl" class="qr-img" alt="QR Code">
+            <div *ngIf="!qrDataUrl" class="qr-placeholder">
+              <mat-icon>qr_code_2</mat-icon>
+            </div>
+          </div>
+          <div class="footer-sig">
+            <div class="stamp-circle">
+              <div class="stamp-inner">
+                <span class="stamp-top">ÉTAT CIVIL</span>
+                <span class="stamp-mid">GUINÉE</span>
+                <span class="stamp-bot">MARIAGE</span>
+              </div>
+            </div>
+          </div>
+          <div class="footer-cert">
+            <p>Certifié conforme au registre de l'état civil</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
