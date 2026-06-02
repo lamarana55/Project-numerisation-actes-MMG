@@ -53,6 +53,9 @@ services:
       SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME}
       SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD}
       
+      NPI_SERVICE_URL: http://generation-npi:8092/api/v1
+      NPI_SERVICE_USERNAME: ${NPI_SERVICE_USERNAME:-superadmin@ravec.gov.gn}
+      NPI_SERVICE_PASSWORD: ${NPI_SERVICE_PASSWORD:-ChangeMe2026!}
       # Java options
       JAVA_OPTS: -Xms512m -Xmx1024m -XX:+UseG1GC
     ports:
@@ -61,6 +64,41 @@ services:
       - backend_logs:/app/logs
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8091/api/v1/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - ravec-network
+
+  # GenerationNPI — Service de génération du NPI
+  generation-npi:
+    build:
+      context: ./GenerationNPI
+      dockerfile: Dockerfile
+    container_name: ravec-generation-npi
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_IP: postgres
+      DATABASE_PORT: 5433
+      DATABASE: ${DATABASE:-ravec_db}
+      DATABASE_USER: ${DATABASE_USER:-ravec_user}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-changeme}
+      SERVER_PORT: 8092
+      FRONT_URL: ${FRONT_URL:-http://localhost:4200}
+      JWT_SECURITY: ${JWT_SECURITY:-your_jwt_secret_key_here_change_in_production}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400}
+      NPI_QUOTA_MENSUEL: ${NPI_QUOTA_MENSUEL:-10000}
+      JAVA_OPTS: -Xms256m -Xmx512m -XX:+UseG1GC
+    ports:
+      - "${NPI_SERVER_PORT:-8092}:8092"
+    volumes:
+      - generation_npi_logs:/app/logs
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8092/api/v1/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -115,6 +153,8 @@ volumes:
   pgadmin_data:
     driver: local
   backend_logs:
+    driver: local
+  generation_npi_logs:
     driver: local
 
 networks:

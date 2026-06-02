@@ -1,0 +1,389 @@
+/* ╔═══════════════════════════════════════════════════════════════════
+   ║  MARRIAGE ACT CREATION — même structure que birth-act, couleurs roses
+   ╚═══════════════════════════════════════════════════════════════════ */
+
+:host {
+  --green:      #880e4f;
+  --green-mid:  #c2185b;
+  --green-l:    #fce4ec;
+  --green-pale: #fff5f8;
+  --primary:    #880e4f;
+  --border:     #e2e8f0;
+  --bg:         #f4f6f9;
+  --card:       #ffffff;
+  --txt:        #0f172a;
+  --txt-2:      #374151;
+  --txt-3:      #9ca3af;
+  --sh-sm:      0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --sh-md:      0 4px 16px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.04);
+  display: block;
+  background: var(--bg);
+  min-height: 100%;
+}
+
+/* ── Page ───────────────────────────────────────────────────────── */
+.creation-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 32px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: fadeUp .35s cubic-bezier(.22,1,.36,1);
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ── En-tête page ───────────────────────────────────────────────── */
+.page-header {
+  background: linear-gradient(135deg, #880e4f 0%, #c2185b 55%, #e91e63 100%);
+  border-radius: 16px;
+  padding: 22px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 8px 24px rgba(136,14,79,.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.page-header::before {
+  content: '';
+  position: absolute;
+  width: 220px; height: 220px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.06);
+  top: -80px; right: -50px;
+}
+
+.page-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 1;
+}
+
+.page-header-icon {
+  width: 50px; height: 50px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.2);
+  border: 1.5px solid rgba(255,255,255,.3);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.page-header-icon mat-icon { font-size: 26px; width: 26px; height: 26px; color: #fff; }
+
+.page-title {
+  margin: 0 0 3px;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #fff;
+}
+.page-subtitle {
+  margin: 0;
+  font-size: .85rem;
+  color: rgba(255,255,255,.8);
+}
+
+.btn-retour {
+  z-index: 1;
+  color: #fff !important;
+  border-color: rgba(255,255,255,.35) !important;
+  background: rgba(255,255,255,.12) !important;
+  font-weight: 600;
+  flex-shrink: 0;
+  border-radius: 10px !important;
+  padding: 0 18px !important;
+  height: 40px;
+  backdrop-filter: blur(4px);
+  transition: all .2s !important;
+  letter-spacing: .02em;
+}
+.btn-retour mat-icon { font-size: 16px; width: 16px; height: 16px; margin-right: 4px; }
+.btn-retour:hover {
+  background: rgba(255,255,255,.22) !important;
+  border-color: rgba(255,255,255,.6) !important;
+  transform: translateX(-2px);
+}
+
+/* ── Carte stepper ──────────────────────────────────────────────── */
+.stepper-card {
+  background: var(--card);
+  border-radius: 18px;
+  border: 1.5px solid var(--border);
+  box-shadow: var(--sh-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   INDICATEUR D'ÉTAPES
+══════════════════════════════════════════════════════════════════ */
+.step-track {
+  display: flex;
+  align-items: center;
+  padding: 24px 32px 20px;
+  border-bottom: 1.5px solid var(--border);
+  background: var(--card);
+  overflow-x: auto;
+}
+
+.step-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  cursor: default;
+}
+.step-node--clickable { cursor: pointer; }
+
+.step-bubble {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: #fff;
+  color: var(--txt-3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+  transition: all .22s cubic-bezier(.22,1,.36,1);
+}
+.done-icon { font-size: 16px; width: 16px; height: 16px; }
+
+.step-node--active .step-bubble {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+  box-shadow: 0 0 0 4px rgba(194,24,91,.15);
+  width: 40px; height: 40px;
+}
+.step-node--done .step-bubble {
+  background: var(--green-l);
+  border-color: var(--green-mid);
+  color: var(--green);
+}
+
+.step-node-label {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--txt-3);
+  white-space: nowrap;
+  transition: color .2s, font-weight .2s;
+}
+.step-node--active .step-node-label { color: var(--primary); font-weight: 700; }
+.step-node--done  .step-node-label  { color: var(--green); }
+
+.step-connector {
+  flex: 1;
+  height: 2px;
+  background: var(--border);
+  margin: 0 6px;
+  margin-bottom: 24px;
+  border-radius: 2px;
+  min-width: 20px;
+  transition: background .3s;
+}
+.step-connector--done { background: var(--green-mid); }
+
+/* ══════════════════════════════════════════════════════════════════
+   CORPS DE L'ÉTAPE
+══════════════════════════════════════════════════════════════════ */
+.step-body {
+  flex: 1;
+  padding: 28px 32px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: fadeStep .25s cubic-bezier(.22,1,.36,1);
+}
+@keyframes fadeStep {
+  from { opacity: 0; transform: translateX(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ── Intro d'étape ──────────────────────────────────────────────── */
+.step-intro {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 20px;
+  border-bottom: 1.5px solid var(--border);
+}
+.step-intro-icon {
+  width: 48px; height: 48px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.step-intro-icon mat-icon { font-size: 26px; width: 26px; height: 26px; }
+.step-intro-title { margin: 0 0 4px; font-size: 1.05rem; font-weight: 800; color: var(--txt); }
+.step-intro-sub   { margin: 0; font-size: .83rem; color: var(--txt-3); }
+
+/* ── Section de champs ──────────────────────────────────────────── */
+.fields-section { display: flex; flex-direction: column; gap: 14px; }
+
+.fields-section-title {
+  margin: 0 0 2px;
+  font-size: .75rem;
+  font-weight: 800;
+  color: var(--txt-2);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding-left: 10px;
+  border-left: 3px solid var(--primary);
+}
+
+/* ── Grilles ────────────────────────────────────────────────────── */
+.fields-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+.fields-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0 16px; }
+.full-width { width: 100%; }
+
+/* ── Champs radio ───────────────────────────────────────────────── */
+.radio-field-wrap { display: flex; flex-direction: column; gap: 10px; padding: 12px 0 4px; }
+.mat-label-custom { font-size: 12px; font-weight: 500; color: rgba(0,0,0,.6); }
+.req { color: #c62828; margin-left: 2px; }
+.radio-row  { display: flex; gap: 20px; align-items: center; }
+.radio-col  { display: flex; flex-direction: column; gap: 6px; }
+
+/* ══════════════════════════════════════════════════════════════════
+   LAYOUT COLONNE UNIQUE (fieldsets empilés)
+══════════════════════════════════════════════════════════════════ */
+.form-columns { display: flex; flex-direction: column; gap: 20px; }
+
+/* ── Layout 2 colonnes (époux / épouse / témoins) ───────────────── */
+.form-columns-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* ── Fieldsets ──────────────────────────────────────────────────── */
+.form-fieldset {
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 0 0 8px;
+  margin: 0;
+  background: #fff;
+  box-shadow: var(--sh-sm);
+  overflow: hidden;
+}
+
+.form-fieldset legend {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--txt);
+  padding: 10px 20px;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+  background: linear-gradient(135deg, rgba(194,24,91,.06) 0%, rgba(194,24,91,.02) 100%);
+  border-bottom: 1.5px solid var(--border);
+}
+
+.legend-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+/* ── Ligne de champ ─────────────────────────────────────────────── */
+.field-row { padding: 0 20px; margin-top: 8px; }
+.field-row:first-of-type { margin-top: 4em !important; }
+
+.field-row--split { display: flex; gap: 24px; align-items: flex-start; }
+.field-row--split > * { flex: 1; }
+.field-full { width: 100%; }
+
+/* ── Champs compacts pleine largeur (override MDC) ──────────────── */
+.form-fieldset .mat-mdc-form-field { width: 100%; }
+.form-fieldset .mat-mdc-text-field-wrapper { padding-top: 0 !important; }
+.form-fieldset .mat-mdc-form-field-infix {
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
+  min-height: 38px !important;
+}
+.form-fieldset .mdc-text-field--outlined { --mdc-outlined-text-field-container-height: 42px; }
+.form-fieldset .mat-mdc-floating-label { top: 21px !important; }
+.form-fieldset .mdc-floating-label--float-above { transform: translateY(-24px) scale(0.75) !important; }
+.form-fieldset .mat-mdc-form-field-subscript-wrapper { height: 14px; }
+.form-fieldset input.mat-mdc-input-element,
+.form-fieldset .mat-mdc-select { font-size: 13.5px; }
+
+/* ── Bloc radio ─────────────────────────────────────────────────── */
+.radio-block { display: flex; flex-direction: column; gap: 8px; padding: 4px 0 6px; }
+.radio-block-label { font-size: 12.5px; font-weight: 500; color: rgba(0,0,0,.6); line-height: 1; }
+.radio-inline { display: flex; flex-wrap: wrap; gap: 6px 24px; }
+
+/* ── Erreur ─────────────────────────────────────────────────────── */
+.field-error { font-size: 11.5px; color: #f44336; margin-top: 3px; }
+
+/* ── Datepicker toggle ──────────────────────────────────────────── */
+.form-fieldset .mat-datepicker-toggle button,
+.mat-datepicker-toggle button { color: var(--primary) !important; }
+
+/* ── Bouton Suivant / Enregistrer ───────────────────────────────── */
+.mat-mdc-raised-button.mat-primary,
+.mat-raised-button.mat-primary {
+  background-color: var(--primary) !important;
+}
+.mat-mdc-raised-button.mat-primary:hover,
+.mat-raised-button.mat-primary:hover {
+  background-color: #c2185b !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   PIED DE PAGE — NAVIGATION
+══════════════════════════════════════════════════════════════════ */
+.step-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  border-top: 1.5px solid var(--border);
+  background: #fafbfc;
+}
+.footer-nav { display: flex; align-items: center; gap: 10px; }
+
+.btn-cancel {
+  color: #64748b !important;
+  border-color: #e2e8f0 !important;
+  background: #fff !important;
+  font-weight: 600 !important;
+  border-radius: 10px !important;
+  padding: 0 18px !important;
+  height: 40px;
+  transition: all .2s !important;
+  letter-spacing: .02em;
+}
+.btn-cancel mat-icon { font-size: 18px; width: 18px; height: 18px; margin-right: 4px; color: #94a3b8; transition: color .2s; }
+.btn-cancel:hover { color: #dc2626 !important; border-color: #fca5a5 !important; background: #fff5f5 !important; }
+.btn-cancel:hover mat-icon { color: #dc2626; }
+
+/* ── Responsive ─────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .form-columns-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 768px) {
+  .creation-page { padding: 16px; }
+  .step-body { padding: 20px 20px 16px; }
+  .step-footer { padding: 14px 20px; flex-direction: column; gap: 12px; align-items: stretch; }
+  .footer-nav { justify-content: flex-end; }
+  .fields-grid-2 { grid-template-columns: 1fr; }
+  .fields-grid-3 { grid-template-columns: 1fr 1fr; }
+  .step-track { padding: 16px 20px 14px; }
+}

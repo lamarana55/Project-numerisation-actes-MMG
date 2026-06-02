@@ -87,10 +87,10 @@
     <div class="table-header-sticky">
       <div class="col-hdr col-hdr--icon"></div>
       <div class="col-hdr col-hdr--statut">STATUT</div>
-      <div class="col-hdr col-hdr--identite">NOM / PRÉNOMS</div>
+      <div class="col-hdr col-hdr--identite">PRÉNOMS &amp; NOM</div>
       <div class="col-hdr col-hdr--npi">NPI</div>
       <div class="col-hdr col-hdr--parents">PÈRE / MÈRE</div>
-      <div class="col-hdr col-hdr--type">TYPE</div>
+      <div class="col-hdr col-hdr--type">TYPE / SOURCE</div>
       <div class="col-hdr col-hdr--acte">N° ACTE</div>
       <div class="col-hdr col-hdr--date">DATE NAISSANCE</div>
       <div class="col-hdr col-hdr--actions">ACTIONS</div>
@@ -122,10 +122,9 @@
           <span class="commune-label" *ngIf="a.commune">{{ a.commune }}</span>
         </div>
 
-        <!-- Identité intéressé -->
+        <!-- Identité -->
         <div class="card-col card-col--identite">
           <div class="identite-principale">
-            <span class="role-pill role-pill--interesse">Intéressé·e</span>
             <span class="td-prenom">{{ a.prenom || '—' }}</span>
             <span class="td-nom">{{ a.nom || '—' }}</span>
             <span [class.sexe-m]="a.sexe==='M'" [class.sexe-f]="a.sexe==='F'" class="sexe-tag">
@@ -154,9 +153,11 @@
 
         <!-- Type document -->
         <div class="card-col card-col--type">
-          <span class="doc-badge" [ngClass]="getDocBadgeClass(a)">
-            {{ getDocLabel(a) }}
+          <span [class]="getTypeActeClass(a)">
+            <mat-icon>{{ (a.typeActe ?? '').toLowerCase() === 'naissance' ? 'child_care' : 'nights_stay' }}</mat-icon>
+            {{ getTypeActeLabel(a) }}
           </span>
+          <span class="source-detail-label">{{ getSourceLabel(a) }}</span>
         </div>
 
         <!-- N° acte -->

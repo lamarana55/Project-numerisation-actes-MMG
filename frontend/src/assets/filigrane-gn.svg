@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500" viewBox="0 0 500 500">
+  <defs>
+    <!-- Vague phase A : première bosse vers le haut -->
+    <path id="wA" d="M0,0 C36,-9 89,-9 125,0 C161,9 214,9 250,0 C286,-9 339,-9 375,0 C411,9 464,9 500,0"/>
+    <!-- Vague phase B : première bosse vers le bas -->
+    <path id="wB" d="M0,0 C36,9 89,9 125,0 C161,-9 214,-9 250,0 C286,9 339,9 375,0 C411,-9 464,-9 500,0"/>
+    <!-- Pétale / feuille : 37 courbes de (250,100) à (250,400) -->
+    <g id="petal">
+      <path d="M250,100 C194,200 194,300 250,400"/>
+      <path d="M250,100 C197,200 197,300 250,400"/>
+      <path d="M250,100 C200,200 200,300 250,400"/>
+      <path d="M250,100 C203,200 203,300 250,400"/>
+      <path d="M250,100 C206,200 206,300 250,400"/>
+      <path d="M250,100 C209,200 209,300 250,400"/>
+      <path d="M250,100 C213,200 213,300 250,400"/>
+      <path d="M250,100 C216,200 216,300 250,400"/>
+      <path d="M250,100 C219,200 219,300 250,400"/>
+      <path d="M250,100 C222,200 222,300 250,400"/>
+      <path d="M250,100 C225,200 225,300 250,400"/>
+      <path d="M250,100 C228,200 228,300 250,400"/>
+      <path d="M250,100 C231,200 231,300 250,400"/>
+      <path d="M250,100 C234,200 234,300 250,400"/>
+      <path d="M250,100 C238,200 238,300 250,400"/>
+      <path d="M250,100 C241,200 241,300 250,400"/>
+      <path d="M250,100 C244,200 244,300 250,400"/>
+      <path d="M250,100 C247,200 247,300 250,400"/>
+      <path d="M250,100 C250,200 250,300 250,400"/>
+      <path d="M250,100 C253,200 253,300 250,400"/>
+      <path d="M250,100 C256,200 256,300 250,400"/>
+      <path d="M250,100 C259,200 259,300 250,400"/>
+      <path d="M250,100 C263,200 263,300 250,400"/>
+      <path d="M250,100 C266,200 266,300 250,400"/>
+      <path d="M250,100 C269,200 269,300 250,400"/>
+      <path d="M250,100 C272,200 272,300 250,400"/>
+      <path d="M250,100 C275,200 275,300 250,400"/>
+      <path d="M250,100 C278,200 278,300 250,400"/>
+      <path d="M250,100 C281,200 281,300 250,400"/>
+      <path d="M250,100 C284,200 284,300 250,400"/>
+      <path d="M250,100 C288,200 288,300 250,400"/>
+      <path d="M250,100 C291,200 291,300 250,400"/>
+      <path d="M250,100 C294,200 294,300 250,400"/>
+      <path d="M250,100 C297,200 297,300 250,400"/>
+      <path d="M250,100 C300,200 300,300 250,400"/>
+      <path d="M250,100 C303,200 303,300 250,400"/>
+      <path d="M250,100 C306,200 306,300 250,400"/>
+    </g>
+  </defs>
+
+  <g fill="none" stroke="#CE1126" stroke-width="0.45" opacity="0.21">
+    <!-- Lignes d'onde en arrière-plan — phases alternées, espacement 12 px -->
+    <use href="#wA" transform="translate(0,6)"/>
+    <use href="#wB" transform="translate(0,18)"/>
+    <use href="#wA" transform="translate(0,30)"/>
+    <use href="#wB" transform="translate(0,42)"/>
+    <use href="#wA" transform="translate(0,54)"/>
+    <use href="#wB" transform="translate(0,66)"/>
+    <use href="#wA" transform="translate(0,78)"/>
+    <use href="#wB" transform="translate(0,90)"/>
+    <use href="#wA" transform="translate(0,102)"/>
+    <use href="#wB" transform="translate(0,114)"/>
+    <use href="#wA" transform="translate(0,126)"/>
+    <use href="#wB" transform="translate(0,138)"/>
+    <use href="#wA" transform="translate(0,150)"/>
+    <use href="#wB" transform="translate(0,162)"/>
+    <use href="#wA" transform="translate(0,174)"/>
+    <use href="#wB" transform="translate(0,186)"/>
+    <use href="#wA" transform="translate(0,198)"/>
+    <use href="#wB" transform="translate(0,210)"/>
+    <use href="#wA" transform="translate(0,222)"/>
+    <use href="#wB" transform="translate(0,234)"/>
+    <use href="#wA" transform="translate(0,246)"/>
+    <use href="#wB" transform="translate(0,258)"/>
+    <use href="#wA" transform="translate(0,270)"/>
+    <use href="#wB" transform="translate(0,282)"/>
+    <use href="#wA" transform="translate(0,294)"/>
+    <use href="#wB" transform="translate(0,306)"/>
+    <use href="#wA" transform="translate(0,318)"/>
+    <use href="#wB" transform="translate(0,330)"/>
+    <use href="#wA" transform="translate(0,342)"/>
+    <use href="#wB" transform="translate(0,354)"/>
+    <use href="#wA" transform="translate(0,366)"/>
+    <use href="#wB" transform="translate(0,378)"/>
+    <use href="#wA" transform="translate(0,390)"/>
+    <use href="#wB" transform="translate(0,402)"/>
+    <use href="#wA" transform="translate(0,414)"/>
+    <use href="#wB" transform="translate(0,426)"/>
+    <use href="#wA" transform="translate(0,438)"/>
+    <use href="#wB" transform="translate(0,450)"/>
+    <use href="#wA" transform="translate(0,462)"/>
+    <use href="#wB" transform="translate(0,474)"/>
+    <use href="#wA" transform="translate(0,486)"/>
+    <use href="#wB" transform="translate(0,498)"/>
+
+    <!-- Rosette centrale : 6 pétales tournés de 30° en 30° -->
+    <use href="#petal" transform="rotate(0,250,250)"/>
+    <use href="#petal" transform="rotate(30,250,250)"/>
+    <use href="#petal" transform="rotate(60,250,250)"/>
+    <use href="#petal" transform="rotate(90,250,250)"/>
+    <use href="#petal" transform="rotate(120,250,250)"/>
+    <use href="#petal" transform="rotate(150,250,250)"/>
+  </g>
+</svg>

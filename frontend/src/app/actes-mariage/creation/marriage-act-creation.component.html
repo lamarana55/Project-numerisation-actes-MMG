@@ -1,0 +1,809 @@
+<div class="creation-page">
+
+  <!-- ── En-tête page ──────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-header-icon"><mat-icon>favorite</mat-icon></div>
+      <div>
+        <h1 class="page-title">Acte de mariage</h1>
+        <p class="page-subtitle">Déclaration d'un mariage civil à l'état civil</p>
+      </div>
+    </div>
+    <button mat-stroked-button class="btn-retour" (click)="cancel()">
+      <mat-icon>arrow_back_ios</mat-icon> Retour
+    </button>
+  </div>
+
+  <!-- ── Carte stepper ──────────────────────────────────────────────────── -->
+  <div class="stepper-card">
+
+    <!-- Indicateur d'étapes -->
+    <div class="step-track">
+      <ng-container *ngFor="let step of steps; let last = last">
+        <div class="step-node"
+             [class.step-node--active]="step.number === currentStep"
+             [class.step-node--done]="isStepCompleted(step.number)"
+             [class.step-node--clickable]="step.number < currentStep"
+             (click)="goTo(step.number)">
+          <div class="step-bubble">
+            <mat-icon *ngIf="isStepCompleted(step.number)" class="done-icon">check</mat-icon>
+            <span *ngIf="!isStepCompleted(step.number)">{{ step.number }}</span>
+          </div>
+          <span class="step-node-label">{{ step.label }}</span>
+        </div>
+        <div *ngIf="!last" class="step-connector"
+             [class.step-connector--done]="isStepCompleted(step.number)"></div>
+      </ng-container>
+    </div>
+
+    <!-- ════════════════ ÉTAPE 1 — MARIAGE ════════════════ -->
+    <div class="step-body" *ngIf="currentStep === 1" [formGroup]="mariageForm">
+
+      <div class="step-intro">
+        <div class="step-intro-icon" style="background:#fce4ec;color:#c2185b">
+          <mat-icon>favorite</mat-icon>
+        </div>
+        <div>
+          <h2 class="step-intro-title">Informations sur le mariage</h2>
+          <p class="step-intro-sub">Type, date, lieu et régime matrimonial</p>
+        </div>
+      </div>
+
+      <div class="form-columns">
+        <fieldset class="form-fieldset">
+          <legend><span class="legend-num">1</span> Détails du mariage</legend>
+
+          <div class="field-row field-row--split">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Type de mariage <span class="req">*</span></mat-label>
+              <mat-select formControlName="typeMariage">
+                <mat-option value="CIVIL">Civil</mat-option>
+                <mat-option value="RELIGIEUX">Religieux</mat-option>
+                <mat-option value="COUTUMIER">Coutumier</mat-option>
+              </mat-select>
+              <mat-error>Ce champ est requis</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Régime matrimonial</mat-label>
+              <mat-select formControlName="regimeMatrimonial">
+                <mat-option value="communaute_biens">Communauté des biens</mat-option>
+                <mat-option value="separation_biens">Séparation des biens</mat-option>
+                <mat-option value="polygamie">Polygamie</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="field-row field-row--split">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Date du mariage <span class="req">*</span></mat-label>
+              <input matInput [matDatepicker]="dpMar" formControlName="dateMariage" [max]="today">
+              <mat-datepicker-toggle matSuffix [for]="dpMar"></mat-datepicker-toggle>
+              <mat-datepicker #dpMar></mat-datepicker>
+              <mat-error>Ce champ est requis</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Heure du mariage</mat-label>
+              <input matInput type="time" formControlName="heureMariage">
+              <mat-icon matSuffix>schedule</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <div class="field-row field-row--split">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Commune du mariage <span class="req">*</span></mat-label>
+              <mat-select formControlName="communeMariage">
+                <mat-option value="">— Sélectionner —</mat-option>
+                <mat-option *ngFor="let c of communes" [value]="c.code">{{ c.nom }}</mat-option>
+              </mat-select>
+              <mat-error>Ce champ est requis</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Lieu précis du mariage</mat-label>
+              <input matInput formControlName="lieuMariage" placeholder="Ex. Mairie centrale, Mosquée…">
+              <mat-icon matSuffix>place</mat-icon>
+            </mat-form-field>
+          </div>
+        </fieldset>
+      </div>
+    </div>
+
+    <!-- ════════════════ ÉTAPE 2 — ÉPOUX ════════════════ -->
+    <div class="step-body" *ngIf="currentStep === 2" [formGroup]="epouxForm">
+
+      <div class="step-intro">
+        <div class="step-intro-icon" style="background:#e3f2fd;color:#1565c0">
+          <mat-icon>person</mat-icon>
+        </div>
+        <div>
+          <h2 class="step-intro-title">Informations sur l'époux</h2>
+          <p class="step-intro-sub">Identité, nationalité, domicile et parents de l'époux</p>
+        </div>
+      </div>
+
+      <div class="form-columns">
+
+        <!-- Identité -->
+        <fieldset class="form-fieldset">
+          <legend><span class="legend-num">1</span> Identité de l'époux</legend>
+
+          <div class="field-row">
+            <div class="radio-block">
+              <span class="radio-block-label">NPI ?</span>
+              <mat-radio-group formControlName="hasNpiEpoux" class="radio-inline">
+                <mat-radio-button value="oui">Oui</mat-radio-button>
+                <mat-radio-button value="non">Non</mat-radio-button>
+              </mat-radio-group>
+            </div>
+          </div>
+          <div class="field-row" *ngIf="epouxHasNpi">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>NPI de l'époux</mat-label>
+              <input matInput formControlName="npiEpoux">
+              <mat-icon matSuffix>fingerprint</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <div class="field-row field-row--split">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Prénoms <span class="req">*</span></mat-label>
+              <input matInput formControlName="prenomEpoux">
+              <mat-icon matSuffix>person</mat-icon>
+              <mat-error>Ce champ est requis</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Nom de famille <span class="req">*</span></mat-label>
+              <input matInput formControlName="nomEpoux">
+              <mat-icon matSuffix>badge</mat-icon>
+              <mat-error>Ce champ est requis</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="field-row field-row--split">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Date de naissance</mat-label>
+              <input matInput [matDatepicker]="dpEpoux" formControlName="dateNaissanceEpoux" [max]="today">
+              <mat-datepicker-toggle matSuffix [for]="dpEpoux"></mat-datepicker-toggle>
+              <mat-datepicker #dpEpoux></mat-datepicker>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Commune de naissance</mat-label>
+              <mat-select formControlName="communeNaissanceEpoux">
+                <mat-option value="">— Sélectionner —</mat-option>
+                <mat-option *ngFor="let c of communes" [value]="c.code">{{ c.nom }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="field-row field-row--split">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Nationalité</mat-label>
+              <mat-select formControlName="nationaliteEpoux">
+                <mat-option value="">— Sélectionner —</mat-option>
+                <mat-option *ngFor="let n of nationalites" [value]="n.code">{{ n.libelleMasculin }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Profession</mat-label>
+              <input matInput formControlName="professionEpoux" [matAutocomplete]="autoProf1">
+              <mat-autocomplete #autoProf1="matAutocomplete">
+                <mat-option *ngFor="let p of filteredProfessionsEpoux$ | async" [value]="p.masculin">{{ p.masculin }}</mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+          </div>
+
+          <div class="field-row field-row--split">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Téléphone</mat-label>
+              <input matInput formControlName="telephoneEpoux">
+              <mat-icon matSuffix>phone</mat-icon>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>État civil antérieur</mat-label>
+              <mat-select formControlName="etatCivilAntEpoux">
+                <mat-option value="celibataire">Célibataire</mat-option>
+                <mat-option value="divorce">Divorcé</mat-option>
+                <mat-option value="veuf">Veuf</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </fieldset>
+
+        <!-- Domicile -->
+        <fieldset class="form-fieldset">
+          <legend><span class="legend-num">2</span> Domicile de l'époux</legend>
+
+          <div class="field-row">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Adresse</mat-label>
+              <input matInput formControlName="adresseEpoux">
+              <mat-icon matSuffix>home</mat-icon>
+            </mat-form-field>
+          </div>
+          <div class="field-row field-row--split">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Région</mat-label>
+              <mat-select formControlName="regionDomicileEpoux" (selectionChange)="onEpouxRegionChange($event.value)">
+                <mat-option value="">— Sélectionner —</mat-option>
+                <mat-option *ngFor="let r of epouxRegions" [value]="r.code">{{ r.nom }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Préfecture</mat-label>
+              <mat-select formControlName="prefectureDomicileEpoux" (selectionChange)="onEpouxPrefectureChange($event.value)">
+                <mat-option value="">— Sélectionner —</mat-option>
+                <mat-option *ngFor="let p of epouxPrefectures" [value]="p.code">{{ p.nom }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="field-row field-row--split">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Commune</mat-label>
+              <mat-select formControlName="communeDomicileEpoux" (selectionChange)="onEpouxCommuneChange($event.value)">
+                <mat-option value="">— Sélectionner —</mat-option>
+                <mat-option *ngFor="let c of epouxCommunes" [value]="c.code">{{ c.nom }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Quartier</mat-label>
+              <mat-select formControlName="quartierDomicileEpoux">
+                <mat-option value="">— Sélectionner —</mat-option>
+                <mat-option *ngFor="let q of epouxQuartiers" [value]="q.code">{{ q.nom }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </fieldset>
+
+        <!-- Parents de l'époux -->
+        <fieldset class="form-fieldset">
+          <legend><span class="legend-num">3</span> Parents de l'époux</legend>
+
+          <div class="field-row field-row--split">
+            <!-- Père -->
+            <div>
+              <h4 class="fields-section-title" style="margin:12px 0 4px">Père de l'époux</h4>
+              <div class="field-row field-row--split">
+                <mat-form-field appearance="outline" class="field-full">
+                  <mat-label>Prénoms du père</mat-label>
+                  <input matInput formControlName="prenomPereEpoux">
+                  <mat-icon matSuffix>person</mat-icon>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="field-full">
+                  <mat-label>Nom du père</mat-label>
+                  <input matInput formControlName="nomPereEpoux">
+                  <mat-icon matSuffix>badge</mat-icon>
+                </mat-form-field>
+              </div>
+              <div class="field-row field-row--split">
+                <mat-form-field appearance="outline" class="field-full">
+                  <mat-label>Profession</mat-label>
+                  <input matInput formControlName="professionPereEpoux" [matAutocomplete]="autoProfPereEx">
+                  <mat-autocomplete #autoProfPereEx="matAutocomplete">
+                    <mat-option *ngFor="let p of filteredProfessionsPereEpoux$ | async" [value]="p.masculin">{{ p.masculin }}</mat-option>
+                  </mat-autocomplete>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="field-full">
+                  <mat-label>Nationalité</mat-label>
+                  <mat-select formControlName="nationalitePereEpoux">
+                    <mat-option value="">— Sélectionner —</mat-option>
+                    <mat-option *ngFor="let n of nationalites" [value]="n.code">{{ n.libelleMasculin }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
+            <!-- Mère -->
+            <div>
+              <h4 class="fields-section-title" style="margin:12px 0 4px">Mère de l'époux</h4>
+              <div class="field-row field-row--split">
+                <mat-form-field appearance="outline" class="field-full">
+                  <mat-label>Prénoms de la mère</mat-label>
+                  <input matInput formControlName="prenomMereEpoux">
+                  <mat-icon matSuffix>person</mat-icon>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="field-full">
+                  <mat-label>Nom de la mère</mat-label>
+                  <input matInput formControlName="nomMereEpoux">
+                  <mat-icon matSuffix>badge</mat-icon>
+                </mat-form-field>
+              </div>
+              <div class="field-row field-row--split">
+                <mat-form-field appearance="outline" class="field-full">
+                  <mat-label>Profession</mat-label>
+                  <input matInput formControlName="professionMereEpoux" [matAutocomplete]="autoProfMereEx">
+                  <mat-autocomplete #autoProfMereEx="matAutocomplete">
+                    <mat-option *ngFor="let p of filteredProfessionsMereEpoux$ | async" [value]="p.feminin">{{ p.feminin }}</mat-option>
+                  </mat-autocomplete>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="field-full">
+                  <mat-label>Nationalité</mat-label>
+                  <mat-select formControlName="nationaliteMereEpoux">
+                    <mat-option value="">— Sélectionner —</mat-option>
+                    <mat-option *ngFor="let n of nationalites" [value]="n.code">{{ n.libelleFeminin }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+      </div>
+    </div>
+
+    <!-- ════════════════ ÉTAPE 3 — ÉPOUSE ════════════════ -->
+    <div class="step-body" *ngIf="currentStep === 3" [formGroup]="epouseForm">
+
+      <div class="step-intro">
+        <div class="step-intro-icon" style="background:#fce4ec;color:#c2185b">
+          <mat-icon>person</mat-icon>
+        </div>
+        <div>
+          <h2 class="step-intro-title">Informations sur l'épouse</h2>
+          <p class="step-intro-sub">Identité, nationalité, domicile et parents de l'épouse</p>
+        </div>
+      </div>
+
+      <div class="form-columns">
+
+        <!-- Identité -->
+        <fieldset class="form-fieldset">
+          <legend><span class="legend-num">1</span> Identité de l'épouse</legend>
+
+          <div class="field-row">
+            <div class="radio-block">
+              <span class="radio-block-label">NPI ?</span>
+              <mat-radio-group formControlName="hasNpiEpouse" class="radio-inline">
+                <mat-radio-button value="oui">Oui</mat-radio-button>
+                <mat-radio-button value="non">Non</mat-radio-button>
+              </mat-radio-group>
+            </div>
+          </div>
+          <div class="field-row" *ngIf="epouseHasNpi">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>NPI de l'épouse</mat-label>
+              <input matInput formControlName="npiEpouse">
+              <mat-icon matSuffix>fingerprint</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <div class="field-row field-row--split">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Prénoms <span class="req">*</span></mat-label>
+              <input matInput formControlName="prenomEpouse">
+              <mat-icon matSuffix>person</mat-icon>
+              <mat-error>Ce champ est requis</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Nom de famille <span class="req">*</span></mat-label>
+              <input matInput formControlName="nomEpouse">
+              <mat-icon matSuffix>badge</mat-icon>
+              <mat-error>Ce champ est requis</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="field-row field-row--split">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Date de naissance</mat-label>
+              <input matInput [matDatepicker]="dpEpouse" formControlName="dateNaissanceEpouse" [max]="today">
+              <mat-datepicker-toggle matSuffix [for]="dpEpouse"></mat-datepicker-toggle>
+              <mat-datepicker #dpEpouse></mat-datepicker>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Commune de naissance</mat-label>
+              <mat-select formControlName="communeNaissanceEpouse">
+                <mat-option value="">— Sélectionner —</mat-option>
+                <mat-option *ngFor="let c of communes" [value]="c.code">{{ c.nom }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="field-row field-row--split">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Nationalité</mat-label>
+              <mat-select formControlName="nationaliteEpouse">
+                <mat-option value="">— Sélectionner —</mat-option>
+                <mat-option *ngFor="let n of nationalites" [value]="n.code">{{ n.libelleFeminin }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Profession</mat-label>
+              <input matInput formControlName="professionEpouse" [matAutocomplete]="autoProf2">
+              <mat-autocomplete #autoProf2="matAutocomplete">
+                <mat-option *ngFor="let p of filteredProfessionsEpouse$ | async" [value]="p.feminin">{{ p.feminin }}</mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+          </div>
+
+          <div class="field-row field-row--split">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Téléphone</mat-label>
+              <input matInput formControlName="telephoneEpouse">
+              <mat-icon matSuffix>phone</mat-icon>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>État civil antérieur</mat-label>
+              <mat-select formControlName="etatCivilAntEpouse">
+                <mat-option value="celibataire">Célibataire</mat-option>
+                <mat-option value="divorcee">Divorcée</mat-option>
+                <mat-option value="veuve">Veuve</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </fieldset>
+
+        <!-- Domicile -->
+        <fieldset class="form-fieldset">
+          <legend><span class="legend-num">2</span> Domicile de l'épouse</legend>
+
+          <div class="field-row">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Adresse</mat-label>
+              <input matInput formControlName="adresseEpouse">
+              <mat-icon matSuffix>home</mat-icon>
+            </mat-form-field>
+          </div>
+          <div class="field-row field-row--split">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Région</mat-label>
+              <mat-select formControlName="regionDomicileEpouse" (selectionChange)="onEpouseRegionChange($event.value)">
+                <mat-option value="">— Sélectionner —</mat-option>
+                <mat-option *ngFor="let r of epouseRegions" [value]="r.code">{{ r.nom }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Préfecture</mat-label>
+              <mat-select formControlName="prefectureDomicileEpouse" (selectionChange)="onEpousePrefectureChange($event.value)">
+                <mat-option value="">— Sélectionner —</mat-option>
+                <mat-option *ngFor="let p of epousePrefectures" [value]="p.code">{{ p.nom }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="field-row field-row--split">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Commune</mat-label>
+              <mat-select formControlName="communeDomicileEpouse" (selectionChange)="onEpouseCommuneChange($event.value)">
+                <mat-option value="">— Sélectionner —</mat-option>
+                <mat-option *ngFor="let c of epouseCommunes" [value]="c.code">{{ c.nom }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Quartier</mat-label>
+              <mat-select formControlName="quartierDomicileEpouse">
+                <mat-option value="">— Sélectionner —</mat-option>
+                <mat-option *ngFor="let q of epouseQuartiers" [value]="q.code">{{ q.nom }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </fieldset>
+
+        <!-- Parents de l'épouse -->
+        <fieldset class="form-fieldset">
+          <legend><span class="legend-num">3</span> Parents de l'épouse</legend>
+
+          <div class="field-row field-row--split">
+            <!-- Père -->
+            <div>
+              <h4 class="fields-section-title" style="margin:12px 0 4px">Père de l'épouse</h4>
+              <div class="field-row field-row--split">
+                <mat-form-field appearance="outline" class="field-full">
+                  <mat-label>Prénoms du père</mat-label>
+                  <input matInput formControlName="prenomPereEpouse">
+                  <mat-icon matSuffix>person</mat-icon>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="field-full">
+                  <mat-label>Nom du père</mat-label>
+                  <input matInput formControlName="nomPereEpouse">
+                  <mat-icon matSuffix>badge</mat-icon>
+                </mat-form-field>
+              </div>
+              <div class="field-row field-row--split">
+                <mat-form-field appearance="outline" class="field-full">
+                  <mat-label>Profession</mat-label>
+                  <input matInput formControlName="professionPereEpouse" [matAutocomplete]="autoProfPrSe">
+                  <mat-autocomplete #autoProfPrSe="matAutocomplete">
+                    <mat-option *ngFor="let p of filteredProfessionsPereEpouse$ | async" [value]="p.masculin">{{ p.masculin }}</mat-option>
+                  </mat-autocomplete>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="field-full">
+                  <mat-label>Nationalité</mat-label>
+                  <mat-select formControlName="nationalitePereEpouse">
+                    <mat-option value="">— Sélectionner —</mat-option>
+                    <mat-option *ngFor="let n of nationalites" [value]="n.code">{{ n.libelleMasculin }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
+            <!-- Mère -->
+            <div>
+              <h4 class="fields-section-title" style="margin:12px 0 4px">Mère de l'épouse</h4>
+              <div class="field-row field-row--split">
+                <mat-form-field appearance="outline" class="field-full">
+                  <mat-label>Prénoms de la mère</mat-label>
+                  <input matInput formControlName="prenomMereEpouse">
+                  <mat-icon matSuffix>person</mat-icon>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="field-full">
+                  <mat-label>Nom de la mère</mat-label>
+                  <input matInput formControlName="nomMereEpouse">
+                  <mat-icon matSuffix>badge</mat-icon>
+                </mat-form-field>
+              </div>
+              <div class="field-row field-row--split">
+                <mat-form-field appearance="outline" class="field-full">
+                  <mat-label>Profession</mat-label>
+                  <input matInput formControlName="professionMereEpouse" [matAutocomplete]="autoProfMrSe">
+                  <mat-autocomplete #autoProfMrSe="matAutocomplete">
+                    <mat-option *ngFor="let p of filteredProfessionsMereEpouse$ | async" [value]="p.feminin">{{ p.feminin }}</mat-option>
+                  </mat-autocomplete>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="field-full">
+                  <mat-label>Nationalité</mat-label>
+                  <mat-select formControlName="nationaliteMereEpouse">
+                    <mat-option value="">— Sélectionner —</mat-option>
+                    <mat-option *ngFor="let n of nationalites" [value]="n.code">{{ n.libelleFeminin }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+      </div>
+    </div>
+
+    <!-- ════════════════ ÉTAPE 4 — TÉMOINS ════════════════ -->
+    <div class="step-body" *ngIf="currentStep === 4" [formGroup]="temoinsForm">
+
+      <div class="step-intro">
+        <div class="step-intro-icon" style="background:#e8f5e9;color:#2e7d32">
+          <mat-icon>groups</mat-icon>
+        </div>
+        <div>
+          <h2 class="step-intro-title">Renseignements sur les témoins</h2>
+          <p class="step-intro-sub">Identité des deux témoins du mariage</p>
+        </div>
+      </div>
+
+      <div class="form-columns">
+
+        <!-- Témoin 1 -->
+        <fieldset class="form-fieldset">
+          <legend><span class="legend-num">1</span> Premier témoin</legend>
+
+          <div class="field-row field-row--split">
+            <div class="radio-block">
+              <span class="radio-block-label">NPI ?</span>
+              <mat-radio-group formControlName="hasNpiTemoin1" class="radio-inline">
+                <mat-radio-button value="oui">Oui</mat-radio-button>
+                <mat-radio-button value="non">Non</mat-radio-button>
+              </mat-radio-group>
+            </div>
+            <div class="radio-block">
+              <span class="radio-block-label">Sexe</span>
+              <mat-radio-group formControlName="sexeTemoin1" class="radio-inline">
+                <mat-radio-button value="M">Masculin</mat-radio-button>
+                <mat-radio-button value="F">Féminin</mat-radio-button>
+              </mat-radio-group>
+            </div>
+          </div>
+          <div class="field-row" *ngIf="temoin1HasNpi">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>NPI</mat-label>
+              <input matInput formControlName="npiTemoin1">
+              <mat-icon matSuffix>fingerprint</mat-icon>
+            </mat-form-field>
+          </div>
+          <div class="field-row field-row--split">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Prénoms <span class="req">*</span></mat-label>
+              <input matInput formControlName="prenomTemoin1">
+              <mat-icon matSuffix>person</mat-icon>
+              <mat-error>Ce champ est requis</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Nom <span class="req">*</span></mat-label>
+              <input matInput formControlName="nomTemoin1">
+              <mat-icon matSuffix>badge</mat-icon>
+              <mat-error>Ce champ est requis</mat-error>
+            </mat-form-field>
+          </div>
+          <div class="field-row field-row--split">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Profession</mat-label>
+              <input matInput formControlName="professionTemoin1" [matAutocomplete]="autoProfT1">
+              <mat-autocomplete #autoProfT1="matAutocomplete">
+                <mat-option *ngFor="let p of filteredProfessionsT1$ | async" [value]="p.masculin">{{ p.masculin }}</mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Téléphone</mat-label>
+              <input matInput formControlName="telephoneTemoin1">
+              <mat-icon matSuffix>phone</mat-icon>
+            </mat-form-field>
+          </div>
+          <div class="field-row">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Adresse</mat-label>
+              <input matInput formControlName="adresseTemoin1">
+              <mat-icon matSuffix>home</mat-icon>
+            </mat-form-field>
+          </div>
+        </fieldset>
+
+        <!-- Témoin 2 -->
+        <fieldset class="form-fieldset">
+          <legend><span class="legend-num">2</span> Deuxième témoin</legend>
+
+          <div class="field-row field-row--split">
+            <div class="radio-block">
+              <span class="radio-block-label">NPI ?</span>
+              <mat-radio-group formControlName="hasNpiTemoin2" class="radio-inline">
+                <mat-radio-button value="oui">Oui</mat-radio-button>
+                <mat-radio-button value="non">Non</mat-radio-button>
+              </mat-radio-group>
+            </div>
+            <div class="radio-block">
+              <span class="radio-block-label">Sexe</span>
+              <mat-radio-group formControlName="sexeTemoin2" class="radio-inline">
+                <mat-radio-button value="M">Masculin</mat-radio-button>
+                <mat-radio-button value="F">Féminin</mat-radio-button>
+              </mat-radio-group>
+            </div>
+          </div>
+          <div class="field-row" *ngIf="temoin2HasNpi">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>NPI</mat-label>
+              <input matInput formControlName="npiTemoin2">
+              <mat-icon matSuffix>fingerprint</mat-icon>
+            </mat-form-field>
+          </div>
+          <div class="field-row field-row--split">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Prénoms <span class="req">*</span></mat-label>
+              <input matInput formControlName="prenomTemoin2">
+              <mat-icon matSuffix>person</mat-icon>
+              <mat-error>Ce champ est requis</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Nom <span class="req">*</span></mat-label>
+              <input matInput formControlName="nomTemoin2">
+              <mat-icon matSuffix>badge</mat-icon>
+              <mat-error>Ce champ est requis</mat-error>
+            </mat-form-field>
+          </div>
+          <div class="field-row field-row--split">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Profession</mat-label>
+              <input matInput formControlName="professionTemoin2" [matAutocomplete]="autoProfT2">
+              <mat-autocomplete #autoProfT2="matAutocomplete">
+                <mat-option *ngFor="let p of filteredProfessionsT2$ | async" [value]="p.masculin">{{ p.masculin }}</mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Téléphone</mat-label>
+              <input matInput formControlName="telephoneTemoin2">
+              <mat-icon matSuffix>phone</mat-icon>
+            </mat-form-field>
+          </div>
+          <div class="field-row">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Adresse</mat-label>
+              <input matInput formControlName="adresseTemoin2">
+              <mat-icon matSuffix>home</mat-icon>
+            </mat-form-field>
+          </div>
+        </fieldset>
+
+      </div>
+    </div>
+
+    <!-- ════════════════ ÉTAPE 5 — ACTE ════════════════ -->
+    <div class="step-body" *ngIf="currentStep === 5" [formGroup]="acteForm">
+
+      <div class="step-intro">
+        <div class="step-intro-icon" style="background:#fff3e0;color:#e65100">
+          <mat-icon>edit_document</mat-icon>
+        </div>
+        <div>
+          <h2 class="step-intro-title">Dressage de l'acte</h2>
+          <p class="step-intro-sub">Officier d'état civil, date et finalisation de l'acte</p>
+        </div>
+      </div>
+
+      <div class="form-columns">
+
+        <fieldset class="form-fieldset">
+          <legend><span class="legend-num">1</span> Officier d'état civil</legend>
+
+          <div class="field-row field-row--split">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Prénoms de l'officier</mat-label>
+              <input matInput formControlName="prenomDeclarant">
+              <mat-icon matSuffix>person</mat-icon>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Nom de l'officier</mat-label>
+              <input matInput formControlName="nomDeclarant">
+              <mat-icon matSuffix>badge</mat-icon>
+            </mat-form-field>
+          </div>
+          <div class="field-row field-row--split">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Qualité / Titre</mat-label>
+              <input matInput formControlName="qualiteDeclarant" placeholder="Ex. Maire, Chef de secteur…">
+              <mat-icon matSuffix>work</mat-icon>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Date de déclaration <span class="req">*</span></mat-label>
+              <input matInput [matDatepicker]="dpDecl" formControlName="dateDeclaration" [max]="today">
+              <mat-datepicker-toggle matSuffix [for]="dpDecl"></mat-datepicker-toggle>
+              <mat-datepicker #dpDecl></mat-datepicker>
+              <mat-error>Ce champ est requis</mat-error>
+            </mat-form-field>
+          </div>
+          <div class="field-row">
+            <div class="radio-block">
+              <span class="radio-block-label">Signature de l'officier</span>
+              <mat-radio-group formControlName="signatureDeclarant" class="radio-inline">
+                <mat-radio-button value="oui">Signé</mat-radio-button>
+                <mat-radio-button value="neSachant">Ne sachant pas signer</mat-radio-button>
+                <mat-radio-button value="nePouvant">Ne pouvant pas signer</mat-radio-button>
+              </mat-radio-group>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="form-fieldset">
+          <legend><span class="legend-num">2</span> Inscription et dressage</legend>
+
+          <div class="field-row field-row--split">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Date de dressage <span class="req">*</span></mat-label>
+              <input matInput [matDatepicker]="dpDress" formControlName="dateDressage" [max]="today">
+              <mat-datepicker-toggle matSuffix [for]="dpDress"></mat-datepicker-toggle>
+              <mat-datepicker #dpDress></mat-datepicker>
+              <mat-error>Ce champ est requis</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Heure de dressage</mat-label>
+              <input matInput type="time" formControlName="heureDressage">
+              <mat-icon matSuffix>schedule</mat-icon>
+            </mat-form-field>
+          </div>
+          <div class="field-row field-row--split">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Point de collecte</mat-label>
+              <input matInput formControlName="pointCollecte">
+              <mat-icon matSuffix>location_on</mat-icon>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Action à faire <span class="req">*</span></mat-label>
+              <mat-select formControlName="actionsFaire">
+                <mat-option value="en_cours_saisie">En cours de saisie</mat-option>
+                <mat-option value="a_valider">Soumettre à validation</mat-option>
+              </mat-select>
+              <mat-error>Ce champ est requis</mat-error>
+            </mat-form-field>
+          </div>
+        </fieldset>
+
+      </div>
+    </div>
+
+    <!-- ── Pied de page : navigation ─────────────────────────────────── -->
+    <div class="step-footer">
+      <button mat-stroked-button class="btn-cancel" (click)="cancel()">
+        <mat-icon>cancel_outline</mat-icon> Annuler
+      </button>
+      <div class="footer-nav">
+        <button mat-stroked-button [disabled]="currentStep === 1" (click)="goPrev()">
+          <mat-icon>arrow_back</mat-icon> Précédent
+        </button>
+        <button mat-raised-button color="primary" (click)="goNext()" [disabled]="isSaving">
+          <mat-spinner *ngIf="isSaving" diameter="18" style="display:inline-block;margin-right:6px"></mat-spinner>
+          <span>{{ currentStep === 5 ? 'Enregistrer' : 'Suivant' }}</span>
+          <mat-icon *ngIf="!isSaving">{{ currentStep === 5 ? 'save' : 'arrow_forward' }}</mat-icon>
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /stepper-card -->
+</div><!-- /creation-page -->

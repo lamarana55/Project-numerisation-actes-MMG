@@ -168,9 +168,12 @@ export class ActesListeComponent implements OnInit {
     ref.afterClosed().subscribe((confirmed: boolean) => {
       if (!confirmed) return;
 
-      const delete$ = (a.typeActe ?? 'naissance').toLowerCase() === 'deces'
+      const typeActe = (a.typeActe ?? 'naissance').toLowerCase();
+      const delete$ = typeActe === 'deces'
         ? this.acteService.deleteDeces(a.id)
-        : this.acteService.deleteNaissance(a.id);
+        : typeActe === 'mariage'
+          ? this.acteService.deleteMariage(a.id)
+          : this.acteService.deleteNaissance(a.id);
 
       delete$.subscribe({
         next: () => {
@@ -199,6 +202,37 @@ export class ActesListeComponent implements OnInit {
       INDEXATION:    'doc-badge--indexation',
     };
     return map[key] || 'doc-badge--unknown';
+  }
+
+  getTypeActeLabel(a: ActeNaissanceSummary): string {
+    const t = (a.typeActe ?? '').toLowerCase();
+    if (t === 'naissance') return 'Naissance';
+    if (t === 'deces' || t === 'décès') return 'Décès';
+    return t || '—';
+  }
+
+  getTypeActeClass(a: ActeNaissanceSummary): string {
+    const t = (a.typeActe ?? '').toLowerCase();
+    if (t === 'naissance') return 'type-acte-tag type-acte-tag--naissance';
+    if (t === 'deces' || t === 'décès') return 'type-acte-tag type-acte-tag--deces';
+    return 'type-acte-tag';
+  }
+
+  getSourceLabel(a: ActeNaissanceSummary): string {
+    const source  = (a.source ?? a.typeCreation ?? '').toUpperCase();
+    const t       = (a.typeActe ?? '').toLowerCase();
+    const isDeces = t === 'deces' || t === 'décès';
+    if (source === 'DECLARATION') {
+      return isDeces
+        ? "Déclaration dans les délais d'un décès (2 mois)"
+        : "Déclaration dans les délais d'une naissance (6 mois)";
+    }
+    if (source === 'TRANSCRIPTION') {
+      return isDeces
+        ? "Transcription du jugement supplétif de décès"
+        : "Transcription du jugement supplétif de naissance";
+    }
+    return DOC_LABELS[source] || source || '—';
   }
 
   getCardClass(a: ActeNaissanceSummary): string {

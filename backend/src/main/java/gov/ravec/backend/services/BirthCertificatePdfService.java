@@ -209,60 +209,102 @@ public class BirthCertificatePdfService {
     }
 
     private void addFooterForActeNaissance(Document document, ActeNaissance a) throws Exception {
-        PdfPTable footerTable = new PdfPTable(2);
-        footerTable.setWidthPercentage(100);
-        footerTable.setWidths(new float[]{30, 70});
 
+        String communeNom    = a.getCommune() != null ? a.getCommune().getNom() : "";
+        String officierNom   = a.getAgent() != null ? a.getAgent().getNomComplet() : "";
+        String dressageDate  = formatLocalDate(a.getDateDressage());
+        String dateAujourdhui = communeNom + ", le " +
+                LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMMM yyyy", java.util.Locale.FRENCH));
+
+        Font fontBold9   = new Font(Font.FontFamily.HELVETICA, 9, Font.BOLD);
+        Font fontItalic9 = new Font(Font.FontFamily.HELVETICA, 9, Font.ITALIC | Font.BOLD);
+
+        // ── Tableau principal : QR code | zone vide | bloc signature ──
+        PdfPTable footerTable = new PdfPTable(3);
+        footerTable.setWidthPercentage(100);
+        footerTable.setWidths(new float[]{28f, 28f, 44f});
+        footerTable.setSpacingBefore(10);
+
+        // QR Code (colonne 1)
         String qrData = "ACTE_NAISSANCE|NPI:" + safe(a.getEnfant() != null ? a.getEnfant().getNpi() : null)
                 + "|NOM:" + safe(a.getEnfant() != null ? a.getEnfant().getPrenom() : null) + " "
                 +           safe(a.getEnfant() != null ? a.getEnfant().getNom() : null)
                 + "|ACTE:" + safe(a.getNumeroActe())
-                + "|COMMUNE:" + safe(a.getCommune() != null ? a.getCommune().getNom() : null);
-        Image qrImage = generateQrCodeImage(qrData, 120, 120);
+                + "|COMMUNE:" + communeNom;
+        Image qrImage = generateQrCodeImage(qrData, 110, 110);
         PdfPCell qrCell = new PdfPCell(qrImage, true);
         qrCell.setBorder(Rectangle.NO_BORDER);
-        qrCell.setFixedHeight(120);
-        qrCell.setPadding(5);
+        qrCell.setMinimumHeight(110);
+        qrCell.setPadding(4);
         footerTable.addCell(qrCell);
 
+        // Zone vide (colonne 2)
+        PdfPCell emptyCell = new PdfPCell();
+        emptyCell.setBorder(Rectangle.NO_BORDER);
+        footerTable.addCell(emptyCell);
+
+        // ── Bloc signature (colonne 3 — extrémité droite) ──────────────
         PdfPCell sigCell = new PdfPCell();
         sigCell.setBorder(Rectangle.NO_BORDER);
-        sigCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        sigCell.setVerticalAlignment(Element.ALIGN_TOP);
+        sigCell.setPaddingTop(4);
 
-        String communeNom = a.getCommune() != null ? a.getCommune().getNom() : "";
-        String dateStr = communeNom + ", le " +
-                LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMMM yyyy", java.util.Locale.FRENCH));
-        Paragraph dateP = new Paragraph(dateStr, FONT_VALUE);
+        // Lieu et date
+        Paragraph dateP = new Paragraph(dateAujourdhui, FONT_VALUE);
         dateP.setAlignment(Element.ALIGN_RIGHT);
+        dateP.setSpacingAfter(2f);
         sigCell.addElement(dateP);
-        sigCell.addElement(Chunk.NEWLINE);
 
-        // Fermeture de l'acte
-        String officier = a.getAgent() != null ? a.getAgent().getNomComplet() : "";
-        String dressageDate = formatLocalDate(a.getDateDressage());
-        String dressageLieu = communeNom;
+        // Dressage
         Paragraph dressageP = new Paragraph(
-                "Dressé à " + dressageLieu + " le " + dressageDate, FONT_VALUE);
+                "Dressé à " + communeNom + " le " + dressageDate, FONT_VALUE);
         dressageP.setAlignment(Element.ALIGN_RIGHT);
+        dressageP.setSpacingAfter(6f);
         sigCell.addElement(dressageP);
-        sigCell.addElement(Chunk.NEWLINE);
 
+        // Certifié conforme
         Paragraph copyP = new Paragraph("Pour copie certifiée conforme à l'original", FONT_VALUE);
         copyP.setAlignment(Element.ALIGN_RIGHT);
+        copyP.setSpacingAfter(8f);
         sigCell.addElement(copyP);
 
-        Paragraph officerP = new Paragraph("L'officier délégué de l'État Civil\n" + officier, FONT_VALUE);
-        officerP.setAlignment(Element.ALIGN_RIGHT);
-        sigCell.addElement(officerP);
+        // ── "Signature" en haut de la zone de signature ──────────
+        Paragraph sigLabelP = new Paragraph("Signature", fontItalic9);
+        sigLabelP.setAlignment(Element.ALIGN_RIGHT);
+        sigLabelP.setSpacingAfter(40f);   // espace pour signer physiquement
+        sigCell.addElement(sigLabelP);
+
+        // Ligne de séparation sous l'espace de signature
+        Paragraph lineP = new Paragraph("_________________________________", FONT_VALUE);
+        lineP.setAlignment(Element.ALIGN_RIGHT);
+        lineP.setSpacingAfter(4f);
+        sigCell.addElement(lineP);
+
+        // Titre officier (ligne 1)
+        Paragraph titreLigne1 = new Paragraph("L'Officier Délégué de l'État Civil", fontBold9);
+        titreLigne1.setAlignment(Element.ALIGN_RIGHT);
+        sigCell.addElement(titreLigne1);
+
+        // Titre officier (ligne 2 — commune)
+        Paragraph titreLigne2 = new Paragraph("de la Commune de " + communeNom, fontBold9);
+        titreLigne2.setAlignment(Element.ALIGN_RIGHT);
+        titreLigne2.setSpacingAfter(3f);
+        sigCell.addElement(titreLigne2);
+
+        // Nom de l'officier en bas (majuscules)
+        Paragraph officierNomP = new Paragraph(officierNom.toUpperCase(), fontBold9);
+        officierNomP.setAlignment(Element.ALIGN_RIGHT);
+        sigCell.addElement(officierNomP);
 
         footerTable.addCell(sigCell);
         document.add(footerTable);
 
-        // Lecture faite
-        document.add(Chunk.NEWLINE);
+        // Lecture faite (pleine largeur sous le tableau)
         Paragraph lectureFaite = new Paragraph(
-                "Lecture faite et le déclarant invité à lire l'acte. Nous, " + officier
-                + ", Officier délégué de l'État civil avons signé avec le déclarant.", FONT_VALUE);
+                "Lecture faite et le déclarant invité à lire l'acte. Nous, " + officierNom
+                + ", Officier Délégué de l'État Civil de la Commune de " + communeNom
+                + ", avons signé avec le déclarant.", FONT_VALUE);
+        lectureFaite.setSpacingBefore(8f);
         document.add(lectureFaite);
     }
 
@@ -584,42 +626,86 @@ public class BirthCertificatePdfService {
     }
 
     private void addFooter(Document document, ValidBirth acte) throws Exception {
-        PdfPTable footerTable = new PdfPTable(2);
-        footerTable.setWidthPercentage(100);
-        footerTable.setWidths(new float[]{30, 70});
 
-        // ── QR Code (colonne gauche) ────────────────────────────
+        String communeNom  = safe(acte.getCommune());
+        String officierNom = (safe(acte.getPrenomOffichier()) + " "
+                              + safe(acte.getNomOfficier())).trim();
+        if (officierNom.isEmpty() && acte.getUser() != null) {
+            officierNom = acte.getUser().getNomComplet();
+        }
+        String dateAujourdhui = communeNom + ", le " +
+                LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMMM yyyy", java.util.Locale.FRENCH));
+
+        Font fontBold9   = new Font(Font.FontFamily.HELVETICA, 9, Font.BOLD);
+        Font fontItalic9 = new Font(Font.FontFamily.HELVETICA, 9, Font.ITALIC | Font.BOLD);
+
+        // ── Tableau : QR code | zone vide | bloc signature ─────────────
+        PdfPTable footerTable = new PdfPTable(3);
+        footerTable.setWidthPercentage(100);
+        footerTable.setWidths(new float[]{28f, 28f, 44f});
+        footerTable.setSpacingBefore(10);
+
+        // QR Code (colonne 1)
         String qrData = buildQrData(acte);
-        Image qrImage = generateQrCodeImage(qrData, 120, 120);
+        Image qrImage = generateQrCodeImage(qrData, 110, 110);
         PdfPCell qrCell = new PdfPCell(qrImage, true);
         qrCell.setBorder(Rectangle.NO_BORDER);
-        qrCell.setFixedHeight(120);
-        qrCell.setPadding(5);
-        qrCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        qrCell.setMinimumHeight(110);
+        qrCell.setPadding(4);
         footerTable.addCell(qrCell);
 
-        // ── Signature (colonne droite) ──────────────────────────
+        // Zone vide (colonne 2)
+        PdfPCell emptyCell = new PdfPCell();
+        emptyCell.setBorder(Rectangle.NO_BORDER);
+        footerTable.addCell(emptyCell);
+
+        // ── Bloc signature (colonne 3 — extrémité droite) ──────────────
         PdfPCell sigCell = new PdfPCell();
         sigCell.setBorder(Rectangle.NO_BORDER);
-        sigCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        sigCell.setVerticalAlignment(Element.ALIGN_TOP);
+        sigCell.setPaddingTop(4);
 
-        String dateFormatted = safe(acte.getCommune()) + ", le " +
-                LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMMM yyyy",
-                        java.util.Locale.FRENCH));
-
-        Paragraph dateP = new Paragraph(dateFormatted, FONT_VALUE);
+        // Lieu et date
+        Paragraph dateP = new Paragraph(dateAujourdhui, FONT_VALUE);
         dateP.setAlignment(Element.ALIGN_RIGHT);
+        dateP.setSpacingAfter(8f);
         sigCell.addElement(dateP);
 
-        sigCell.addElement(Chunk.NEWLINE);
-
+        // Certifié conforme
         Paragraph copyP = new Paragraph("Pour copie certifiée conforme à l'original", FONT_VALUE);
         copyP.setAlignment(Element.ALIGN_RIGHT);
+        copyP.setSpacingAfter(8f);
         sigCell.addElement(copyP);
 
-        Paragraph officerP = new Paragraph("L'officier délégué de l'État Civil", FONT_VALUE);
-        officerP.setAlignment(Element.ALIGN_RIGHT);
-        sigCell.addElement(officerP);
+        // ── "Signature" en haut de la zone de signature ──────────
+        Paragraph sigLabelP = new Paragraph("Signature", fontItalic9);
+        sigLabelP.setAlignment(Element.ALIGN_RIGHT);
+        sigLabelP.setSpacingAfter(40f);   // espace pour signer physiquement
+        sigCell.addElement(sigLabelP);
+
+        // Ligne de séparation sous l'espace de signature
+        Paragraph lineP = new Paragraph("_________________________________", FONT_VALUE);
+        lineP.setAlignment(Element.ALIGN_RIGHT);
+        lineP.setSpacingAfter(4f);
+        sigCell.addElement(lineP);
+
+        // Titre officier (ligne 1)
+        Paragraph titreLigne1 = new Paragraph("L'Officier Délégué de l'État Civil", fontBold9);
+        titreLigne1.setAlignment(Element.ALIGN_RIGHT);
+        sigCell.addElement(titreLigne1);
+
+        // Titre officier (ligne 2 — commune)
+        Paragraph titreLigne2 = new Paragraph("de la Commune de " + communeNom, fontBold9);
+        titreLigne2.setAlignment(Element.ALIGN_RIGHT);
+        titreLigne2.setSpacingAfter(3f);
+        sigCell.addElement(titreLigne2);
+
+        // Nom de l'officier en bas
+        if (!officierNom.isEmpty()) {
+            Paragraph officierNomP = new Paragraph(officierNom.toUpperCase(), fontBold9);
+            officierNomP.setAlignment(Element.ALIGN_RIGHT);
+            sigCell.addElement(officierNomP);
+        }
 
         footerTable.addCell(sigCell);
         document.add(footerTable);

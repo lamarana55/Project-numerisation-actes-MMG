@@ -660,3 +660,36 @@ input[type="time"].form-control { padding: 4px 8px; }
   .btn-action, .btn-reset, .btn-edit, .btn-cancel { width: 100%; justify-content: center; }
   .image-container { min-height: 260px; }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   DATE FIELD VALIDATION
+   ══════════════════════════════════════════════════════════════════════════ */
+.date-input-wrap {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.date-input-wrap .input-error {
+  border-color: #dc3545 !important;
+  background-color: #fff8f8;
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.15);
+}
+
+.date-error-msg {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 3px;
+  font-size: 0.78rem;
+  color: #dc3545;
+  line-height: 1.2;
+}
+
+.date-error-msg mat-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}

@@ -1,5 +1,6 @@
 package gov.ravec.backend.services;
 
+import gov.ravec.backend.dto.ActeDecesDetailDTO;
 import gov.ravec.backend.dto.ActeDecesRequest;
 import gov.ravec.backend.dto.ActePageResponseDTO;
 import gov.ravec.backend.dto.ActeSummaryDTO;
@@ -34,6 +35,28 @@ public class ActeDecesService {
         this.acteRepo      = acteRepo;
         this.typeActeRepo  = typeActeRepo;
         this.userConnected = userConnected;
+    }
+
+    // ── Consultation détail ───────────────────────────────────────
+
+    @Transactional(readOnly = true)
+    public ActeDecesDetailDTO getById(String id) {
+        ActeDeces acte = acteRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Acte introuvable : " + id));
+        return ActeDecesDetailDTO.from(acte);
+    }
+
+    // ── Validation ────────────────────────────────────────────────
+
+    @Transactional
+    public ActeSummaryDTO valider(String id) {
+        ActeDeces acte = acteRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Acte introuvable : " + id));
+        acte.setStatut(ValidationStatut.VALIDE);
+        acte.setValidateur(userConnected.getUserConnected());
+        acte.setDateAction(LocalDateTime.now());
+        acteRepo.save(acte);
+        return ActeSummaryDTO.from(acte);
     }
 
     // ── Suppression logique ───────────────────────────────────────

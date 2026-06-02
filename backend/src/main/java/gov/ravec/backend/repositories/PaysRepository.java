@@ -10,4 +10,5 @@ import gov.ravec.backend.entities.Pays;
 public interface PaysRepository extends JpaRepository<Pays, UUID>{
     boolean existsByCode( String code);
     Optional<Pays> findByCode(String code);
+    Optional<Pays> findFirstByNomIgnoreCase(String nom);
 }

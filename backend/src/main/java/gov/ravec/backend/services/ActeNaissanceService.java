@@ -33,6 +33,7 @@ public class ActeNaissanceService {
     private final TypeActeRepository typeActeRepo;
     private final UserConnected userConnected;
     private final NpiGeneratorService npiGenerator;
+    private final NpiClientService npiClientService;
     private final PersonneRepository personneRepo;
 
     public ActeNaissanceService(ActeNaissanceRepository acteRepo,
@@ -40,13 +41,15 @@ public class ActeNaissanceService {
                                 TypeActeRepository typeActeRepo,
                                 UserConnected userConnected,
                                 NpiGeneratorService npiGenerator,
+                                NpiClientService npiClientService,
                                 PersonneRepository personneRepo) {
-        this.acteRepo      = acteRepo;
-        this.communeRepo   = communeRepo;
-        this.typeActeRepo  = typeActeRepo;
-        this.userConnected = userConnected;
-        this.npiGenerator  = npiGenerator;
-        this.personneRepo  = personneRepo;
+        this.acteRepo         = acteRepo;
+        this.communeRepo      = communeRepo;
+        this.typeActeRepo     = typeActeRepo;
+        this.userConnected    = userConnected;
+        this.npiGenerator     = npiGenerator;
+        this.npiClientService = npiClientService;
+        this.personneRepo     = personneRepo;
     }
 
     // ── Consultation par identifiant ──────────────────────────────
@@ -68,10 +71,14 @@ public class ActeNaissanceService {
         acte.setValidateur(userConnected.getUserConnected());
         acte.setDateAction(LocalDateTime.now());
 
-        // Générer le NPI de l'enfant si pas encore attribué, puis persister explicitement
+        // Générer le NPI via le microservice, avec fallback sur le générateur local
         Personne enfant = acte.getEnfant();
         if (enfant != null && (enfant.getNpi() == null || enfant.getNpi().isBlank())) {
-            enfant.setNpi(npiGenerator.generate(acte));
+            String npi = npiClientService.generateNpi(acte);
+            if (npi == null || npi.isBlank()) {
+                npi = npiGenerator.generate(acte);
+            }
+            enfant.setNpi(npi);
             personneRepo.save(enfant);
         }
 
@@ -283,6 +290,9 @@ public class ActeNaissanceService {
                     req.getAdressePere(), req.getPaysResidencePere(),
                     req.getRegionDomicilePere(), req.getPrefectureDomicilePere(),
                     req.getCommuneDomicilePere(), req.getQuartierDomicilePere());
+            if (req.getNpiPere() != null && !req.getNpiPere().isBlank()) {
+                pere.setNpi(req.getNpiPere());
+            }
         }
 
         // ── Mère ────────────────────────────────────────────────
@@ -298,6 +308,9 @@ public class ActeNaissanceService {
                     req.getAdresseMere(), req.getPaysResidenceMere(),
                     req.getRegionDomicileMere(), req.getPrefectureDomicileMere(),
                     req.getCommuneDomicileMere(), req.getQuartierDomicileMere());
+            if (req.getNpiMere() != null && !req.getNpiMere().isBlank()) {
+                mere.setNpi(req.getNpiMere());
+            }
         }
 
         // ── Déclarant ───────────────────────────────────────────
@@ -309,6 +322,9 @@ public class ActeNaissanceService {
             declarant.setNom(req.getNomDeclarant());
             declarant.setSexe(req.getSexeDeclarant());
             declarant.setTelephone(req.getTelephoneDeclarant());
+            if (req.getNpiDeclarant() != null && !req.getNpiDeclarant().isBlank()) {
+                declarant.setNpi(req.getNpiDeclarant());
+            }
         }
 
         // ── Type d'acte ─────────────────────────────────────────
@@ -385,6 +401,18 @@ public class ActeNaissanceService {
                 .build();
 
         acteRepo.save(acte);
+
+        // Générer le NPI de l'enfant via le microservice, avec fallback sur le générateur local
+        Personne enfantSauve = acte.getEnfant();
+        if (enfantSauve != null && (enfantSauve.getNpi() == null || enfantSauve.getNpi().isBlank())) {
+            String npi = npiClientService.generateNpi(acte);
+            if (npi == null || npi.isBlank()) {
+                npi = npiGenerator.generate(acte);
+            }
+            enfantSauve.setNpi(npi);
+            personneRepo.save(enfantSauve);
+        }
+
         return ActeSummaryDTO.from(acte);
     }
 

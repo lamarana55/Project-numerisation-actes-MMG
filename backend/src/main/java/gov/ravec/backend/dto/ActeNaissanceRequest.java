@@ -44,6 +44,7 @@ public class ActeNaissanceRequest {
     private Integer rangNaissanceMere;
 
     // ── Père ──────────────────────────────────────────────────────
+    private String npiPere;
     private String pereConnu;
     private String pereDecede;
     private String prenomPere;
@@ -67,6 +68,7 @@ public class ActeNaissanceRequest {
     private String quartierDomicilePere;
 
     // ── Mère ──────────────────────────────────────────────────────
+    private String npiMere;
     private String mereConnue;
     private String mereDecedee;
     private String prenomMere;
@@ -96,6 +98,7 @@ public class ActeNaissanceRequest {
     private String communeMariage;
 
     // ── Déclarant ─────────────────────────────────────────────────
+    private String npiDeclarant;
     private String qualiteDeclarant;
     private LocalDate dateDeclaration;
     private String prenomDeclarant;

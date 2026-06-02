@@ -97,13 +97,14 @@
   font-weight: 600;
   flex-shrink: 0;
   border-radius: 10px !important;
-  padding: 0 18px !important;
+  padding: 0 22px !important;
+  min-width: 110px !important;
   height: 40px;
   backdrop-filter: blur(4px);
   transition: all .2s !important;
   letter-spacing: .02em;
 }
-.btn-retour mat-icon { font-size: 16px; width: 16px; height: 16px; margin-right: 4px; }
+.btn-retour mat-icon { font-size: 16px; width: 16px; height: 16px; margin-right: 6px; }
 .btn-retour:hover {
   background: rgba(255,255,255,.22) !important;
   border-color: rgba(255,255,255,.6) !important;
