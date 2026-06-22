@@ -1,0 +1,119 @@
+name: ravec_mobile
+description: "Application mobile PN-RAVEC — déclarations d'état civil, demandes d'actes et notifications."
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+  flutter: ">=3.24.0"
+
+# ============================================================
+#  DÉPENDANCES — runtime
+# ============================================================
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # ── State management / DI (Riverpod) ──────────────────────
+  # Providers déclarés manuellement (Notifier/NotifierProvider) → pas de
+  # riverpod_generator/annotation (qui tirent un analyzer_plugin incompatible).
+  flutter_riverpod: ^2.6.1
+
+  # ── Réseau (Dio) ──────────────────────────────────────────
+  dio: ^5.7.0
+  pretty_dio_logger: ^1.4.0
+
+  # ── Navigation (GoRouter) ─────────────────────────────────
+  go_router: ^14.6.2
+
+  # ── Persistance locale / hors ligne (SQLite chiffré) ──────
+  drift: ^2.22.0
+  sqlcipher_flutter_libs: ^0.6.4   # SQLite + chiffrement (SQLCipher)
+  path_provider: ^2.1.5
+  path: ^1.9.0
+
+  # ── Stockage sécurisé (tokens JWT) ────────────────────────
+  flutter_secure_storage: ^9.2.2
+
+  # ── Notifications push (Firebase) ─────────────────────────
+  firebase_core: ^3.8.0
+  firebase_messaging: ^15.1.5
+  flutter_local_notifications: ^18.0.1
+
+  # ── Sérialisation / modèles immuables ─────────────────────
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+
+  # ── Connectivité & synchronisation différée ───────────────
+  connectivity_plus: ^6.1.0
+  # NB: workmanager retiré temporairement (0.5.x casse la compilation Kotlin
+  # Android). À réintroduire en version compatible lors de l'implémentation du
+  # SyncEngine (tâches de synchronisation en arrière-plan).
+
+  # ── Sécurité d'accès (biométrie) ──────────────────────────
+  local_auth: ^2.3.0
+
+  # ── Capture & compression de pièces (certificat naissance) ─
+  image_picker: ^1.1.2
+  flutter_image_compress: ^2.3.0
+  permission_handler: ^11.3.1
+
+  # ── Géolocalisation (lieu de naissance) ───────────────────
+  geolocator: ^13.0.2
+
+  # ── Identifiants (idempotency key anti-doublon offline) ───
+  uuid: ^4.5.1
+
+  # ── Saisie téléphone internationale (sélecteur d'indicatif pays) ──
+  intl_phone_field: ^3.2.0
+
+  # ── Divers ────────────────────────────────────────────────
+  intl: ^0.19.0
+  logger: ^2.4.0
+  cupertino_icons: ^1.0.8
+
+# ============================================================
+#  DÉPENDANCES — développement / génération de code
+# ============================================================
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  build_runner: ^2.4.13
+  freezed: ^2.5.7
+  json_serializable: ^6.8.0
+  drift_dev: ^2.22.0
+
+  # NB: riverpod_generator / custom_lint / riverpod_lint retirés temporairement —
+  # ils tirent un analyzer_plugin incompatible avec l'analyzer résolu et cassent
+  # build_runner. Les providers Riverpod sont déclarés manuellement (pas de codegen).
+  flutter_lints: ^5.0.0
+
+  # Génération des icônes de lancement à partir du logo RAVEC
+  flutter_launcher_icons: ^0.14.1
+
+# ============================================================
+#  ICÔNE DE L'APPLICATION (logo RAVEC)
+# ============================================================
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/app_icon.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/icon/app_icon.png"
+  remove_alpha_ios: true
+
+# ============================================================
+#  CONFIGURATION FLUTTER
+# ============================================================
+flutter:
+  uses-material-design: true
+
+  # Génération des fichiers de localisation (l10n.yaml à fournir ultérieurement)
+  generate: true
+
+  assets:
+    - assets/images/
+    - assets/icon/

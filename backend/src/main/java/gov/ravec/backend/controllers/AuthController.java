@@ -65,6 +65,9 @@ public class AuthController {
     @Autowired
     private JwtProvider jwtProvider;
 
+    @Autowired
+    private gov.ravec.backend.services.OtpService otpService;
+
     @Value("${ravec.app.frontend.url}")
     private String link;
 
@@ -77,18 +80,17 @@ public class AuthController {
     })
     public ResponseEntity<?> login(@RequestBody LoginInfo loginInfo) {
         Optional<User> user = userRepository.findByUsernameAndIsDelete(loginInfo.getUsername(), Delete.No);
-        if (user.isEmpty()) {
-            logger.warn("User {} : not found ", loginInfo.getUsername());
-            return new ResponseEntity<>(
-                    new Response<String>("User Not found ", "failed",
-                            "Le compte " + loginInfo.getUsername()
-                                    + " n'existe pas dans la base. Veuillez contacter l'administrateur."),
-                    HttpStatus.FORBIDDEN);
-        }
 
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginInfo.getUsername(), loginInfo.getPassword()));
+
+            if (user.isEmpty()) {
+                logger.warn("Auth succeeded but user {} not found in DB", loginInfo.getUsername());
+                return new ResponseEntity<>(
+                        new Response<String>("Auth failed", "failed", "Identifiants incorrects. Veuillez contacter l'administrateur."),
+                        HttpStatus.UNAUTHORIZED);
+            }
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String jwt = jwtProvider.generateJwtToken(authentication);
@@ -117,8 +119,9 @@ public class AuthController {
             return ResponseEntity.ok(response);
 
         } catch (BadCredentialsException e) {
+            logger.warn("Failed login attempt for username: {}", loginInfo.getUsername());
             return new ResponseEntity<>(
-                    new Response("Incorrect Password", "failed", "Le mot de passe est incorrect."),
+                    new Response("Auth failed", "failed", "Identifiants incorrects. Veuillez réessayer ou contacter l'administrateur."),
                     HttpStatus.UNAUTHORIZED);
         }
     }
@@ -149,12 +152,9 @@ public class AuthController {
                     userUpdate.getNom() + " " + userUpdate.getPrenom(),
                     userUpdate.getEmail(),
                     lien);
-
-            return ResponseEntity.ok(new Response<>(true, "mail envoyer "));
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new Response<>(false, "l'email n'existe pas dans la base "));
         }
+        // Toujours retourner le même message pour éviter l'énumération des emails
+        return ResponseEntity.ok(new Response<>(true, "Si cet email existe, un lien de réinitialisation a été envoyé."));
     }
 
     /**
@@ -201,6 +201,113 @@ public class AuthController {
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new Response<>(false, "Utilisateur introuvable."));
+    }
+
+    // ── Connexion par téléphone + OTP ─────────────────────────────────────────
+
+    @PostMapping("/otp/request")
+    @Operation(summary = "Demander un code OTP",
+            description = "Génère un code à 6 chiffres et l'envoie par SMS (NimbaSMS) au numéro fourni.")
+    public ResponseEntity<Object> otpRequest(@RequestBody Map<String, String> body) {
+        String telephone = body.get("telephone");
+        if (telephone == null || telephone.isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new Response<>(false, "Le numéro de téléphone est obligatoire."));
+        }
+        String tel = telephone.trim();
+
+        // Application réservée au personnel déclarant pré-enregistré : on n'envoie
+        // pas de SMS à un numéro inconnu (sécurité + coût SMS). La recherche ignore
+        // le formatage (« +224 628228638 » vs « +224628228638 »).
+        boolean compteExiste = userRepository.findByTelephoneNormalise(normaliserTelephone(tel))
+                .filter(u -> u.getIsDelete() != Delete.Yes)
+                .isPresent();
+        if (!compteExiste) {
+            logger.warn("Demande OTP refusée : aucun compte actif pour le numéro {}", tel);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new Response<>(false,
+                            "Ce numéro n'est pas enregistré. Contactez l'administrateur pour activer votre compte."));
+        }
+
+        boolean envoye = otpService.requestCode(tel);
+        if (envoye) {
+            return ResponseEntity.ok(new Response<>(true, "Un code de connexion a été envoyé par SMS."));
+        }
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                .body(new Response<>(false, "Échec de l'envoi du SMS. Réessayez plus tard."));
+    }
+
+    @PostMapping("/otp/verify")
+    @Operation(summary = "Vérifier le code OTP",
+            description = "Vérifie le code reçu par SMS et retourne un token JWT si le compte existe.")
+    public ResponseEntity<Object> otpVerify(@RequestBody Map<String, String> body) {
+        String telephone = body.get("telephone");
+        String code = body.get("code");
+
+        if (telephone == null || telephone.isBlank() || code == null || code.isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new Response<>(false, "Téléphone et code sont obligatoires."));
+        }
+
+        if (!otpService.verifyCode(telephone.trim(), code.trim())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new Response<>(false, "Code incorrect ou expiré."));
+        }
+
+        String tel = telephone.trim();
+        // L'application mobile est réservée au personnel déclarant pré-enregistré
+        // dans le système (formations sanitaires : sage-femme, infirmier, médecin ;
+        // lieux de culte : imam, prêtre). Aucun auto-provisionnement : si le numéro
+        // n'est pas déjà rattaché à un compte actif, l'accès est refusé. La recherche
+        // ignore le formatage (espaces, tirets…).
+        User user = userRepository.findByTelephoneNormalise(normaliserTelephone(tel))
+                .filter(u -> u.getIsDelete() != Delete.Yes)
+                .orElse(null);
+
+        if (user == null) {
+            logger.warn("Connexion OTP refusée : aucun compte actif pour le numéro {}", tel);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new Response<>(false,
+                            "Ce numéro n'est pas enregistré. Contactez l'administrateur pour activer votre compte."));
+        }
+
+        gov.ravec.backend.utils.UserPrinciple principal =
+                gov.ravec.backend.utils.UserPrinciple.build(user);
+        Authentication authentication =
+                new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
+
+        String jwt = jwtProvider.generateJwtToken(authentication);
+
+        JwtResponse response = JwtResponse.builder()
+                .accessToken(jwt)
+                .name(user.getPrenom() + "  " + user.getNom())
+                .username(user.getUsername())
+                .tokenType("Bearer")
+                .authorities(principal.getAuthorities())
+                .profil(principal.getProfil())
+                .profilLibelle(principal.getProfilLibelle())
+                .niveauAdministratif(principal.getNiveauAdministratif())
+                .regionId(principal.getRegionId())
+                .regionNom(principal.getRegionNom())
+                .prefectureId(principal.getPrefectureId())
+                .prefectureNom(principal.getPrefectureNom())
+                .communeId(principal.getCommuneId())
+                .communeNom(principal.getCommuneNom())
+                .mustChangePassword(user.isMustChangePassword())
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Normalise un numéro de téléphone pour la comparaison : supprime espaces,
+     * tirets, parenthèses et points, en conservant le « + » et les chiffres.
+     * Doit produire le même format que la fonction SQL de
+     * {@code findByTelephoneNormalise}.
+     */
+    private static String normaliserTelephone(String telephone) {
+        if (telephone == null) return "";
+        return telephone.replaceAll("[\\s\\-().]", "");
     }
 
     @PostMapping("/change-first-password")

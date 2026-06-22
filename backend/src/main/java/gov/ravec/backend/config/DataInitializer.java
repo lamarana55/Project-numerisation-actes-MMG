@@ -16,7 +16,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * ============================================================
@@ -510,6 +509,7 @@ public class DataInitializer implements CommandLineRunner {
                 p.get(P_VOIR_PROFIL)
             )
         );
+
     }
 
     // ─────────────────────────────────────────────────────────

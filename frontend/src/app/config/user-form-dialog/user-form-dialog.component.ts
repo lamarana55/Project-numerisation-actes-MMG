@@ -42,6 +42,10 @@ export class UserFormDialogComponent implements OnInit, OnDestroy {
   // Niveau du profil sélectionné — détermine quels selects afficher
   selectedNiveau: NiveauAdministratif | null = null;
 
+  // Garde-fou : en mode édition, la restauration territoriale ne doit s'exécuter
+  // qu'une seule fois et seulement lorsque les régions ET le rôle sont chargés.
+  private territoryRestored = false;
+
   readonly NIVEAU_LABELS = NIVEAU_LABELS;
   readonly PROFIL_META = PROFIL_META;
 
@@ -130,8 +134,26 @@ export class UserFormDialogComponent implements OnInit, OnDestroy {
       this.selectedRole   = matched;
       this.selectedNiveau = this.resolveNiveau(matched);
       this.applyTerritoryValidation(this.selectedNiveau);
-      this.restoreEditModeTerritory();
+      // Le territoire ne peut être restauré que si la liste des régions est déjà
+      // chargée. Sinon, loadRegions() déclenchera la restauration à sa complétion.
+      this.tryRestoreEditModeTerritory();
     }
+  }
+
+  /**
+   * Restaure les affectations territoriales en mode édition, mais uniquement
+   * lorsque les deux prérequis asynchrones sont satisfaits : la liste des
+   * régions est chargée ET le rôle (donc le niveau) est résolu. Appelé à la
+   * fois après le chargement des rôles et après celui des régions ; un drapeau
+   * garantit une exécution unique.
+   */
+  private tryRestoreEditModeTerritory(): void {
+    if (this.territoryRestored) return;
+    if (!this.isEditMode || !this.data.user?.regionId) return;
+    if (this.regions.length === 0) return;     // attendre le chargement des régions
+    if (!this.selectedNiveau) return;          // attendre la résolution du rôle
+    this.territoryRestored = true;
+    this.restoreEditModeTerritory();
   }
 
   /**
@@ -151,7 +173,12 @@ export class UserFormDialogComponent implements OnInit, OnDestroy {
 
   private loadRegions(): void {
     this.territoryService.getRegions().pipe(takeUntil(this.destroy$)).subscribe({
-      next: (regions) => this.regions = regions,
+      next: (regions) => {
+        this.regions = regions;
+        // Les régions viennent d'arriver : tenter la restauration territoriale
+        // si le rôle est déjà résolu (mode édition).
+        this.tryRestoreEditModeTerritory();
+      },
       error: () => this.showSnackBar('Erreur lors du chargement des régions', 'error')
     });
   }

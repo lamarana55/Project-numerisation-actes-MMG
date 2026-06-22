@@ -11,10 +11,21 @@ public class RestClientConfig {
     @Value("${npi.service.base-url:http://generation-npi:8092/api/v1}")
     private String npiBaseUrl;
 
+    @Value("${nimbasms.base-url:https://api.nimbasms.com/v1}")
+    private String nimbaSmsBaseUrl;
+
     @Bean("npiRestClient")
     public RestClient npiRestClient() {
         return RestClient.builder()
                 .baseUrl(npiBaseUrl)
+                .build();
+    }
+
+    /** Client HTTP pour l'API NimbaSMS (envoi de SMS). */
+    @Bean("nimbaSmsRestClient")
+    public RestClient nimbaSmsRestClient() {
+        return RestClient.builder()
+                .baseUrl(nimbaSmsBaseUrl)
                 .build();
     }
 }

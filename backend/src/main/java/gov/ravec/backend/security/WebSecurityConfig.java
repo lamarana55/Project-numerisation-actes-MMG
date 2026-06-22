@@ -56,8 +56,12 @@ public class WebSecurityConfig {
                     "/swagger-ui.html",
                     "/swagger-resources/**",
                     "/webjars/**"
-                ).permitAll()
+                ).hasRole("ADMIN")
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                // /actuator/prometheus : scrapé par Prometheus sur le réseau Docker
+                // INTERNE uniquement (le backend n'est pas exposé sur l'hôte). Ne JAMAIS
+                // exposer le port 8091 publiquement sans réintroduire une protection.
+                .requestMatchers("/actuator/prometheus").permitAll()
                 .requestMatchers("/actuator/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             );

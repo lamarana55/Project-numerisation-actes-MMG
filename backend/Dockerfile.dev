@@ -10,7 +10,11 @@ WORKDIR /app
 # Copier d'abord le pom.xml seul pour profiter du cache Docker
 # (les dépendances ne sont retéléchargées que si pom.xml change)
 COPY pom.xml .
-RUN mvn dependency:go-offline -B
+# BuildKit cache mount : le dossier .m2 persiste entre les builds → pas de re-téléchargement
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn dependency:go-offline -B \
+      -Dmaven.wagon.http.retryHandler.count=5 \
+      -Dmaven.wagon.httpconnectionManager.ttlSeconds=120
 
 # Copier le code source
 COPY src ./src

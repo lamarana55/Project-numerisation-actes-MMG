@@ -3,6 +3,7 @@ version: '3.8'
 # ============================================================
 #  ravec-num — Docker Compose DÉVELOPPEMENT (hot-reload activé)
 # ============================================================
+# Prérequis : DOCKER_BUILDKIT=1 (activé dans dev.sh)
 
 services:
 
@@ -50,12 +51,15 @@ services:
       DATABASE: ${DATABASE:-db_numerisation}
       DATABASE_USER: ${DATABASE_USER:-postgres}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD:-postgres}
-      DDL_AUTO: ${DDL_AUTO:-update}
+      DDL_AUTO: ${DDL_AUTO:-validate}
       SERVER_PORT: 8091
       FRONT_URL: ${FRONT_URL:-http://localhost:4200}
       JWT_SECURITY: ${JWT_SECURITY:-dev_secret_key_change_in_prod}
       SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME:-}
       SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD:-}
+      NIMBASMS_SERVICE_ID: ${NIMBASMS_SERVICE_ID:-}
+      NIMBASMS_SECRET_TOKEN: ${NIMBASMS_SECRET_TOKEN:-}
+      NIMBASMS_SENDER_NAME: ${NIMBASMS_SENDER_NAME:-RAVEC}
       NPI_SERVICE_URL: http://generation-npi:8092/api/v1
       NPI_SERVICE_USERNAME: ${NPI_SERVICE_USERNAME:-superadmin@ravec.gov.gn}
       NPI_SERVICE_PASSWORD: ${NPI_SERVICE_PASSWORD:-ChangeMe2026!}

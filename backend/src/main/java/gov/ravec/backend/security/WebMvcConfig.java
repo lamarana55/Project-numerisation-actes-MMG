@@ -19,12 +19,7 @@ public class WebMvcConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // ✅ Origine exacte (pas "*") pour permettre les credentials
-        config.setAllowedOrigins(List.of(
-            frontendUrl,              // ex: http://localhost:4200
-            "http://localhost:4200",  // fallback dev
-            "http://localhost:80"     // nginx si prod
-        ));
+        config.setAllowedOrigins(List.of(frontendUrl));
 
         config.setAllowedMethods(List.of(
             "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"

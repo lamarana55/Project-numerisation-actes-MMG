@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { forkJoin } from 'rxjs';
 import { ToastService } from '../services/toast.service';
 import { GeodataService } from '../services/geodata.service';
@@ -191,6 +192,11 @@ export class NumerisationIndexationComponent implements OnInit {
     date_de_nais_mere:        null,
   };
 
+  safePdfUrl: SafeResourceUrl | null = null;
+  private pdfBlobUrl: string | null = null;
+
+  readonly today = new Date();
+
   // ── Zoom image ────────────────────────────────────────────────────────────
   zoomLevel = 1;
   maxZoom = 3;
@@ -209,6 +215,7 @@ export class NumerisationIndexationComponent implements OnInit {
     private professionService: ProfessionService,
     private nationaliteService: NationaliteService,
     private apiService: ApiService,
+    private sanitizer: DomSanitizer,
   ) {}
 
   ngOnInit(): void {
@@ -263,13 +270,29 @@ export class NumerisationIndexationComponent implements OnInit {
     this.data = {};
     this.isEditing = true;
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const result = e.target?.result as string;
-      this.previewUrl = result;
-      this.fileBase64 = result.split(',')[1];
-    };
-    reader.readAsDataURL(file);
+    if (file.type === 'application/pdf') {
+      // Blob URL pour iframe — les data: URLs sont bloquées par les navigateurs dans les iframes
+      this.revokePdfBlobUrl();
+      this.pdfBlobUrl = URL.createObjectURL(file);
+      this.safePdfUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.pdfBlobUrl);
+      // Base64 pour l'envoi au backend
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        this.previewUrl = result;
+        this.fileBase64 = result.split(',')[1];
+      };
+      reader.readAsDataURL(file);
+    } else {
+      this.safePdfUrl = null;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        this.previewUrl = result;
+        this.fileBase64 = result.split(',')[1];
+      };
+      reader.readAsDataURL(file);
+    }
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -613,6 +636,17 @@ export class NumerisationIndexationComponent implements OnInit {
 
   fromTimeInputFormat(time: string): string { return time || ''; }
 
+  isPdf(): boolean {
+    return this.fileMediaType === 'application/pdf';
+  }
+
+  private revokePdfBlobUrl(): void {
+    if (this.pdfBlobUrl) {
+      URL.revokeObjectURL(this.pdfBlobUrl);
+      this.pdfBlobUrl = null;
+    }
+  }
+
   getImageSrc(): string {
     if (!this.previewUrl) return '';
     return this.previewUrl;
@@ -649,6 +683,14 @@ export class NumerisationIndexationComponent implements OnInit {
   }
 
   onImageMouseUp(): void { this.isDragging = false; }
+
+  onContainerMouseDown(e: MouseEvent): void {
+    if (!this.isPdf()) this.onImageMouseDown(e);
+  }
+
+  onContainerMouseMove(e: MouseEvent): void {
+    if (!this.isPdf()) this.onImageMouseMove(e);
+  }
 
   getImageTransform(): string {
     return `translate(${this.panX}px,${this.panY}px) scale(${this.zoomLevel}) rotate(${this.rotation}deg)`;
@@ -729,14 +771,6 @@ export class NumerisationIndexationComponent implements OnInit {
   // ═══════════════════════════════════════════════════════════════════════════
 
   saveActe(): void {
-    // Valider toutes les dates avant sauvegarde
-    Object.keys(this.dateErrors).forEach(f => {
-      this.dateErrors[f] = this.computeDateError(f);
-    });
-    if (Object.values(this.dateErrors).some(e => e !== null)) {
-      this.showWarning('Veuillez corriger les dates invalides avant de sauvegarder.');
-      return;
-    }
     if (!this.data.nom_membre || !this.data.prenoms || !this.data.date_de_nais_membre) {
       this.showWarning('Nom, prénoms et date de naissance sont obligatoires.');
       return;
@@ -764,6 +798,8 @@ export class NumerisationIndexationComponent implements OnInit {
     this.selectedFile = null;
     this.previewUrl = null;
     this.fileBase64 = null;
+    this.revokePdfBlobUrl();
+    this.safePdfUrl = null;
     this.data = {};
     this.isEditing = false;
     this.isSaving = false;

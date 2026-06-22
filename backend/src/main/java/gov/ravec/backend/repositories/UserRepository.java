@@ -10,6 +10,8 @@ import gov.ravec.backend.utils.Statut;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -24,6 +26,18 @@ public interface UserRepository extends JpaRepository<User, String> {
     Optional<User> findByCode(String code);
     Optional<User> findByTelephone(String telephone);
     Optional<User> findByResetPasswordToken(String resetPasswordToken);
+
+    /**
+     * Recherche un utilisateur par téléphone en ignorant le formatage
+     * (espaces, tirets, parenthèses, points). Les numéros sont stockés de
+     * façon hétérogène en base (« +224 628228638 », « +224622000001 »…) ;
+     * le paramètre {@code telephoneNormalise} doit être déjà nettoyé côté
+     * appelant (chiffres + éventuel « + » uniquement).
+     */
+    @Query("SELECT u FROM User u WHERE "
+         + "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(u.telephone, ' ', ''), '-', ''), '(', ''), ')', ''), '.', '') "
+         + "= :telephoneNormalise")
+    Optional<User> findByTelephoneNormalise(@Param("telephoneNormalise") String telephoneNormalise);
 
     // ── Recherches avec vérification de suppression ──────────────────────────
     Optional<User> findByUsernameAndIsDelete(String username, Delete isDelete);

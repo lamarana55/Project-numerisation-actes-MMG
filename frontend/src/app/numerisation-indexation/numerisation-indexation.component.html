@@ -58,21 +58,18 @@
                       <input *ngIf="isEditing" [(ngModel)]="data.nom_membre" class="form-control">
                     </div>
                     <div class="data-item">
-                      <span class="data-label">Date naissance :</span>
+                      <span class="data-label">Date naissance <span class="required-star">*</span></span>
                       <span class="data-value" *ngIf="!isEditing">{{ data.date_de_nais_membre || 'Non renseignée' }}</span>
-                      <div *ngIf="isEditing" class="date-input-wrap">
-                        <input [(ngModel)]="data.date_de_nais_membre"
-                               [class.input-error]="dateErrors['date_de_nais_membre']"
-                               class="form-control"
+                      <mat-form-field *ngIf="isEditing" appearance="outline" class="date-picker-field" subscriptSizing="dynamic">
+                        <input matInput [matDatepicker]="pickerMembre"
+                               [value]="stringToDate(data.date_de_nais_membre)"
+                               (dateChange)="onDateChange($event, 'date_de_nais_membre')"
+                               [max]="today"
                                placeholder="JJ/MM/AAAA"
-                               maxlength="10"
-                               (input)="formatDateOnInput($event, 'date_de_nais_membre')"
-                               (keydown)="handleDateKeydown($event, 'date_de_nais_membre')"
-                               (blur)="validateMemberDate()">
-                        <span class="date-error-msg" *ngIf="dateErrors['date_de_nais_membre']">
-                          <mat-icon>error_outline</mat-icon>{{ dateErrors['date_de_nais_membre'] }}
-                        </span>
-                      </div>
+                               required>
+                        <mat-datepicker-toggle matIconSuffix [for]="pickerMembre"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerMembre startView="multi-year"></mat-datepicker>
+                      </mat-form-field>
                     </div>
                     <div class="data-item">
                       <span class="data-label">Heure naissance :</span>
@@ -160,19 +157,15 @@
                     <div class="data-item">
                       <span class="data-label">Date des faits :</span>
                       <span class="data-value" *ngIf="!isEditing">{{ data.date_etablissement_acte || 'Non renseignée' }}</span>
-                      <div *ngIf="isEditing" class="date-input-wrap">
-                        <input [(ngModel)]="data.date_etablissement_acte"
-                               [class.input-error]="dateErrors['date_etablissement_acte']"
-                               class="form-control"
-                               placeholder="JJ/MM/AAAA"
-                               maxlength="10"
-                               (input)="formatDateOnInput($event, 'date_etablissement_acte')"
-                               (keydown)="handleDateKeydown($event, 'date_etablissement_acte')"
-                               (blur)="validateFactDate()">
-                        <span class="date-error-msg" *ngIf="dateErrors['date_etablissement_acte']">
-                          <mat-icon>error_outline</mat-icon>{{ dateErrors['date_etablissement_acte'] }}
-                        </span>
-                      </div>
+                      <mat-form-field *ngIf="isEditing" appearance="outline" class="date-picker-field" subscriptSizing="dynamic">
+                        <input matInput [matDatepicker]="pickerFaits"
+                               [value]="stringToDate(data.date_etablissement_acte)"
+                               (dateChange)="onDateChange($event, 'date_etablissement_acte')"
+                               [max]="today"
+                               placeholder="JJ/MM/AAAA">
+                        <mat-datepicker-toggle matIconSuffix [for]="pickerFaits"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerFaits startView="year"></mat-datepicker>
+                      </mat-form-field>
                     </div>
                   </div>
                 </div>
@@ -294,19 +287,15 @@
                     <div class="data-item">
                       <span class="data-label">Date naissance :</span>
                       <span class="data-value" *ngIf="!isEditing">{{ data.date_de_nais_pere || 'Non renseignée' }}</span>
-                      <div *ngIf="isEditing" class="date-input-wrap">
-                        <input [(ngModel)]="data.date_de_nais_pere"
-                               [class.input-error]="dateErrors['date_de_nais_pere']"
-                               class="form-control"
-                               placeholder="JJ/MM/AAAA"
-                               maxlength="10"
-                               (input)="formatDateOnInput($event, 'date_de_nais_pere')"
-                               (keydown)="handleDateKeydown($event, 'date_de_nais_pere')"
-                               (blur)="validateParentDate('date_de_nais_pere')">
-                        <span class="date-error-msg" *ngIf="dateErrors['date_de_nais_pere']">
-                          <mat-icon>error_outline</mat-icon>{{ dateErrors['date_de_nais_pere'] }}
-                        </span>
-                      </div>
+                      <mat-form-field *ngIf="isEditing" appearance="outline" class="date-picker-field" subscriptSizing="dynamic">
+                        <input matInput [matDatepicker]="pickerPere"
+                               [value]="stringToDate(data.date_de_nais_pere)"
+                               (dateChange)="onDateChange($event, 'date_de_nais_pere')"
+                               [max]="today"
+                               placeholder="JJ/MM/AAAA">
+                        <mat-datepicker-toggle matIconSuffix [for]="pickerPere"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerPere startView="multi-year"></mat-datepicker>
+                      </mat-form-field>
                     </div>
                   </div>
                   <div class="col-md-6">
@@ -430,19 +419,15 @@
                     <div class="data-item">
                       <span class="data-label">Date naissance :</span>
                       <span class="data-value" *ngIf="!isEditing">{{ data.date_de_nais_mere || 'Non renseignée' }}</span>
-                      <div *ngIf="isEditing" class="date-input-wrap">
-                        <input [(ngModel)]="data.date_de_nais_mere"
-                               [class.input-error]="dateErrors['date_de_nais_mere']"
-                               class="form-control"
-                               placeholder="JJ/MM/AAAA"
-                               maxlength="10"
-                               (input)="formatDateOnInput($event, 'date_de_nais_mere')"
-                               (keydown)="handleDateKeydown($event, 'date_de_nais_mere')"
-                               (blur)="validateParentDate('date_de_nais_mere')">
-                        <span class="date-error-msg" *ngIf="dateErrors['date_de_nais_mere']">
-                          <mat-icon>error_outline</mat-icon>{{ dateErrors['date_de_nais_mere'] }}
-                        </span>
-                      </div>
+                      <mat-form-field *ngIf="isEditing" appearance="outline" class="date-picker-field" subscriptSizing="dynamic">
+                        <input matInput [matDatepicker]="pickerMere"
+                               [value]="stringToDate(data.date_de_nais_mere)"
+                               (dateChange)="onDateChange($event, 'date_de_nais_mere')"
+                               [max]="today"
+                               placeholder="JJ/MM/AAAA">
+                        <mat-datepicker-toggle matIconSuffix [for]="pickerMere"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerMere startView="multi-year"></mat-datepicker>
+                      </mat-form-field>
                     </div>
                   </div>
                   <div class="col-md-6">
@@ -617,14 +602,14 @@
         <div class="col-md-6 p-0 image-column">
           <div class="image-container"
                (wheel)="onImageWheel($event)"
-               (mousedown)="onImageMouseDown($event)"
-               (mousemove)="onImageMouseMove($event)"
+               (mousedown)="onContainerMouseDown($event)"
+               (mousemove)="onContainerMouseMove($event)"
                (mouseup)="onImageMouseUp()"
                (mouseleave)="onImageMouseUp()">
 
-            <!-- Contrôles de zoom -->
-            <div class="zoom-controls">
-              <button class="zoom-btn" (click)="rotateImage()" title="Pivoter l'image" mat-icon-button>
+            <!-- Contrôles de zoom (images uniquement) -->
+            <div class="zoom-controls" *ngIf="!isPdf()">
+              <button class="zoom-btn" (click)="rotateImage()" title="Pivoter" mat-icon-button>
                 <mat-icon>rotate_right</mat-icon>
               </button>
               <button class="zoom-btn" (click)="zoomIn()" title="Zoom avant">+</button>
@@ -634,13 +619,20 @@
               </button>
             </div>
 
-            <!-- Indicateur de zoom — centré en bas -->
-            <div class="zoom-indicator">{{ Math.round(zoomLevel * 100) }}%</div>
+            <!-- Indicateur de zoom (images uniquement) -->
+            <div class="zoom-indicator" *ngIf="!isPdf()">{{ Math.round(zoomLevel * 100) }}%</div>
 
-            <!-- Image WRAPPER : centre l'image par défaut à 100% -->
-            <div class="image-wrapper">
+            <!-- Affichage IMAGE (JPG, PNG, WEBP) -->
+            <div class="image-wrapper" *ngIf="!isPdf()">
               <img [src]="getImageSrc()" alt="Image Acte" class="zoomable-image"
                    [style.transform]="getImageTransform()" (load)="onImageLoad()" />
+            </div>
+
+            <!-- Affichage PDF — iframe zoomable + rotatif via CSS transform -->
+            <div class="image-wrapper pdf-wrapper" *ngIf="isPdf()">
+              <div class="pdf-transform-wrapper" [style.transform]="getImageTransform()">
+                <iframe [src]="safePdfUrl" class="pdf-viewer" frameborder="0"></iframe>
+              </div>
             </div>
 
             <!-- Bouton changer de fichier -->
