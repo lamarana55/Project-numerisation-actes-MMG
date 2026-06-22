@@ -1,0 +1,94 @@
+# ============================================================
+#  Stack d'observabilité PN-RAVEC — PRÉPARÉE, NON ACTIVÉE
+#  Active uniquement à la demande :
+#    docker compose -f monitoring/docker-compose.observability.yml up -d
+#
+#  Se branche sur le réseau applicatif existant (ravec-pn-network) pour
+#  scraper backend:8091/actuator/prometheus. Lancer la stack applicative AVANT.
+#
+#  Accès (exposés en localhost — passer par un reverse-proxy/SSH tunnel) :
+#    Grafana    → http://127.0.0.1:3000  (admin / ${GRAFANA_PASSWORD})
+#    Prometheus → http://127.0.0.1:9090
+# ============================================================
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: ravec-pn-prometheus
+    restart: unless-stopped
+    logging: *default-logging
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=15d'
+    ports:
+      - "127.0.0.1:9090:9090"
+    networks:
+      - ravec-pn-network
+      - observability
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: ravec-pn-grafana
+    restart: unless-stopped
+    logging: *default-logging
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:?GRAFANA_PASSWORD requis}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - observability
+
+  loki:
+    image: grafana/loki:latest
+    container_name: ravec-pn-loki
+    restart: unless-stopped
+    logging: *default-logging
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - loki_data:/loki
+    ports:
+      - "127.0.0.1:3100:3100"
+    networks:
+      - observability
+
+  promtail:
+    image: grafana/promtail:latest
+    container_name: ravec-pn-promtail
+    restart: unless-stopped
+    logging: *default-logging
+    command: -config.file=/etc/promtail/config.yml
+    volumes:
+      - ./promtail/config.yml:/etc/promtail/config.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - loki
+    networks:
+      - observability
+
+volumes:
+  prometheus_data:
+  grafana_data:
+  loki_data:
+
+networks:
+  # Réseau applicatif existant (créé par docker-compose.server.yml)
+  ravec-pn-network:
+    external: true
+    name: pn-ravec_ravec-pn-network
+  observability:
+    driver: bridge

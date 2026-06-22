@@ -1,0 +1,65 @@
+name: Rollback — Production
+
+# Rollback manuel vers une version précédente (tag sha-<commit> ou « latest »).
+# Lancement : onglet Actions → Rollback — Production → Run workflow.
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Tag à redéployer (ex: sha-<commit> ou latest). Vide = dernier déploiement réussi enregistré sur le serveur."
+        required: false
+        default: ""
+      reason:
+        description: "Raison du rollback (traçabilité)"
+        required: true
+
+concurrency:
+  group: cd-production
+  cancel-in-progress: false
+
+jobs:
+  rollback:
+    name: Rollback production
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Rollback par SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          envs: TARGET_TAG,REASON,GHCR_TOKEN,GHCR_USER
+          script_stop: true
+          script: |
+            set -euo pipefail
+            cd /opt/pn-ravec
+            chmod +x ops/*.sh
+            echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
+
+            TAG="${TARGET_TAG}"
+            if [ -z "$TAG" ]; then
+              TAG=$(cat .last_successful_deploy 2>/dev/null || echo "")
+            fi
+            if [ -z "$TAG" ]; then
+              echo "Aucun tag fourni et aucun dernier déploiement enregistré. Abandon."
+              exit 1
+            fi
+            echo "↩️  Rollback vers le tag : $TAG — raison : ${REASON}"
+            ./ops/rollback.sh "$TAG"
+        env:
+          TARGET_TAG: ${{ github.event.inputs.image_tag }}
+          REASON: ${{ github.event.inputs.reason }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+          GHCR_USER: ${{ secrets.GHCR_USER || github.actor }}
+
+      - name: Résumé
+        if: always()
+        run: |
+          {
+            echo "## ↩️ Rollback PN-RAVEC"
+            echo "- Tag cible : \`${{ github.event.inputs.image_tag || 'dernier déploiement réussi' }}\`"
+            echo "- Raison : ${{ github.event.inputs.reason }}"
+            echo "- Déclenché par : @${{ github.actor }}"
+          } >> "$GITHUB_STEP_SUMMARY"

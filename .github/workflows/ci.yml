@@ -1,5 +1,7 @@
-name: CI — Tests
+name: CI — Tests & Qualité
 
+# Tests sur toute Pull Request vers main ET sur tout push (sauf main, géré par le CD
+# qui rejoue les tests avant de déployer). Objectif : aucun code non testé ne fusionne.
 on:
   push:
     branches-ignore:
@@ -8,12 +10,19 @@ on:
     branches:
       - main
 
-jobs:
-  # ── Backend Tests (Spring Boot / Maven) ──────────────────────────────────
-  backend-test:
-    name: Backend Tests
-    runs-on: ubuntu-latest
+# Annule les exécutions précédentes encore en cours sur la même branche.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
+permissions:
+  contents: read
+
+jobs:
+  # ── Backend (Spring Boot / Maven) ────────────────────────────────────────
+  backend-test:
+    name: Backend — Tests
+    runs-on: ubuntu-latest
     services:
       postgres:
         image: postgres:15-alpine
@@ -28,9 +37,8 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Set up Java 21
@@ -40,7 +48,7 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Run backend tests
+      - name: Tests backend
         working-directory: ./backend
         env:
           DATABASE_IP: localhost
@@ -49,68 +57,64 @@ jobs:
           DATABASE_USER: ravec_user
           DATABASE_PASSWORD: ravec_test_pass
           DDL_AUTO: create-drop
-          JWT_SECURITY: ci_test_jwt_secret_key_32chars_min
+          JWT_SECURITY: ci_test_jwt_secret_key_32chars_minimum_xx
           SERVER_PORT: 8091
           FRONT_URL: http://localhost:4200
           SPRING_MAIL_USERNAME: test@test.com
           SPRING_MAIL_PASSWORD: test
-        run: mvn clean test --no-transfer-progress
+        run: mvn -B --no-transfer-progress clean test
 
-      - name: Upload test results
+      - name: Publier les rapports de test
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: backend-test-results
           path: backend/target/surefire-reports/
+          if-no-files-found: ignore
 
-  # ── Frontend Tests (Angular / Karma) ─────────────────────────────────────
+  # ── Frontend (Angular / Karma) ───────────────────────────────────────────
   frontend-test:
-    name: Frontend Tests
+    name: Frontend — Tests & Build
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Node.js 18
+      - name: Set up Node.js 20
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Install dependencies
+      - name: Install
         working-directory: ./frontend
         run: npm ci --legacy-peer-deps
 
-      - name: Run frontend tests (headless)
+      - name: Tests (headless)
         working-directory: ./frontend
         run: npm test -- --watch=false --browsers=ChromeHeadless --no-progress
 
-      - name: Build production bundle (smoke test)
+      - name: Build production (smoke test)
         working-directory: ./frontend
         run: npm run build -- --configuration production
 
-  # ── Lint check ───────────────────────────────────────────────────────────
+  # ── Lint frontend (non bloquant) ─────────────────────────────────────────
   frontend-lint:
-    name: Frontend Lint
+    name: Frontend — Lint
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Set up Node.js 18
+      - name: Set up Node.js 20
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: npm
           cache-dependency-path: frontend/package-lock.json
-
-      - name: Install dependencies
+      - name: Install
         working-directory: ./frontend
         run: npm ci --legacy-peer-deps
-
       - name: Lint
         working-directory: ./frontend
         run: npx ng lint --no-progress || true

@@ -1,0 +1,24 @@
+# Normalisation des fins de ligne — garantit des scripts exécutables sur Linux.
+# Sans cela, un checkout Windows (autocrlf) produit des CRLF qui cassent les
+# scripts shell sur le serveur (« /bin/sh^M: bad interpreter »).
+
+* text=auto
+
+# Toujours en LF (exécutés/lus sur Linux)
+*.sh        text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+*.conf      text eol=lf
+Dockerfile* text eol=lf
+*.properties text eol=lf
+
+# Fichiers binaires (pas de conversion)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.jar binary
+*.woff binary
+*.woff2 binary
+*.ttf binary

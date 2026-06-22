@@ -10,7 +10,8 @@
 set -euo pipefail
 
 APP_DIR="/opt/pn-ravec"
-COMPOSE_FILE="$APP_DIR/docker-compose.prod.yml"
+# Source unique de déploiement (prod.yml/yml redondants supprimés le 2026-06-22)
+COMPOSE_FILE="$APP_DIR/docker-compose.server.yml"
 ENV_FILE="$APP_DIR/.env"
 REGISTRY="ghcr.io"
 OWNER="lamarana55"

@@ -15,6 +15,11 @@ RUN --mount=type=cache,target=/root/.m2 mvn clean package -DskipTests -B
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 
+# curl : requis par le HEALTHCHECK Docker (/actuator/health). Image nettoyée ensuite.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
 # Créer un utilisateur non-root pour la sécurité
 RUN groupadd -r spring && useradd -r -g spring spring
 
@@ -35,6 +40,10 @@ EXPOSE 8091
 
 # Variables d'environnement par défaut (peuvent être overridées)
 ENV JAVA_OPTS="-Xms512m -Xmx1024m"
+
+# Vérification de santé via l'endpoint Actuator
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
+  CMD curl -fsS http://localhost:8091/api/v1/actuator/health || exit 1
 
 # Point d'entrée
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

@@ -45,11 +45,19 @@ backend/logs/*
 
 # Environment files
 .env
+.env copy
 .env.server
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+# Le modèle versionné reste autorisé :
+!.env.server.example
+
+# CI/CD — artefacts générés côté serveur (jamais versionnés)
+/backups/
+.last_successful_deploy
+deploy-history.log
 
 # OS generated files
 .DS_Store
