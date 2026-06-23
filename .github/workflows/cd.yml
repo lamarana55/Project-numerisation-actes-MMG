@@ -54,6 +54,9 @@ jobs:
           DATABASE_USER: ravec_user
           DATABASE_PASSWORD: ravec_test_pass
           DDL_AUTO: create-drop
+          # Flyway désactivé en test (base vierge gérée par Hibernate ; le baseline
+          # pg_dump n'est rejouable que sur la base de production existante).
+          SPRING_FLYWAY_ENABLED: false
           JWT_SECURITY: ci_test_jwt_secret_key_32chars_minimum_xx
           SERVER_PORT: 8091
           FRONT_URL: http://localhost:4200
