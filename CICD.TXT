@@ -1,0 +1,258 @@
+Mission : Modernisation complète du CI/CD PN-RAVEC
+
+Tu es un Architecte DevOps Senior spécialisé dans GitHub Actions, Docker, Spring Boot, Angular, PostgreSQL, Nginx et les déploiements de production sécurisés.
+
+Analyse l’intégralité du projet actuel et mets en place une architecture CI/CD professionnelle de niveau entreprise.
+
+Contexte
+
+Le projet PN-RAVEC est composé de :
+
+* Backend : Spring Boot
+* Frontend : Angular
+* Base de données : PostgreSQL
+* Conteneurisation : Docker
+* Registry : GitHub Container Registry (GHCR)
+* Déploiement actuel : script deploy.sh exécuté manuellement depuis le poste développeur
+* Serveur Linux unique de production
+* Docker Compose utilisé sur le serveur
+
+Le script actuel :
+
+* Build les images Docker localement
+* Push les images vers GHCR
+* Se connecte en SSH au serveur
+* Exécute docker compose pull
+* Exécute docker compose up -d
+
+Objectif
+
+Supprimer la dépendance au poste développeur et mettre en place un pipeline CI/CD entièrement automatisé via GitHub Actions.
+
+Le développeur ne doit plus faire que :
+
+git push origin main
+
+Le reste doit être automatique.
+
+⸻
+
+Étape 1 : Audit
+
+Analyse :
+
+* Structure backend
+* Structure frontend
+* Dockerfile backend
+* Dockerfile frontend
+* docker-compose.server.yml
+* .env.server
+* deploy.sh
+
+Produis un rapport détaillé indiquant :
+
+* Les points forts
+* Les risques
+* Les améliorations recommandées
+* Les problèmes de sécurité éventuels
+* Les problèmes de maintenabilité
+
+⸻
+
+Étape 2 : GitHub Actions
+
+Créer une architecture CI/CD complète.
+
+Workflow principal :
+
+1. Checkout du code
+2. Build backend
+3. Exécution des tests backend
+4. Build frontend
+5. Exécution des tests frontend
+6. Build Docker backend
+7. Build Docker frontend
+8. Push GHCR
+9. Déploiement automatique
+10. Vérification de santé
+11. Notification de succès ou échec
+
+Créer les workflows GitHub Actions nécessaires.
+
+Utiliser les meilleures pratiques GitHub Actions.
+
+⸻
+
+Étape 3 : Gestion des versions Docker
+
+Supprimer la dépendance au tag latest.
+
+Mettre en place :
+
+* image SHA Git
+* image versionnée
+* conservation éventuelle du tag latest
+
+Exemple :
+
+ghcr.io/lamarana55/ravec-backend:<commit_sha>
+
+ghcr.io/lamarana55/ravec-frontend:<commit_sha>
+
+⸻
+
+Étape 4 : Docker Compose Production
+
+Refactoriser docker-compose.server.yml afin que :
+
+* les images soient injectées par variables d’environnement
+* les volumes soient persistants
+* les réseaux soient correctement isolés
+* les healthchecks Docker soient configurés
+
+Exemple :
+
+backend:
+healthcheck:
+…
+
+frontend:
+healthcheck:
+…
+
+postgres:
+healthcheck:
+…
+
+⸻
+
+Étape 5 : Sécurité
+
+Mettre en place :
+
+* Utilisation exclusive de GitHub Secrets
+* Aucun secret dans le dépôt Git
+* SSH sécurisé
+* Permissions GitHub minimales
+* Nettoyage automatique des images inutilisées
+* Vérification des vulnérabilités Docker
+
+Ajouter une étape de scan des images.
+
+⸻
+
+Étape 6 : Rollback Professionnel
+
+Créer un mécanisme de rollback.
+
+Objectif :
+
+Pouvoir revenir instantanément à une version précédente.
+
+Exemple :
+
+rollback.sh 
+
+ou
+
+workflow GitHub Actions de rollback.
+
+Documenter complètement la procédure.
+
+⸻
+
+Étape 7 : Monitoring
+
+Préparer l’intégration de :
+
+* Prometheus
+* Grafana
+* Loki
+
+Même si leur déploiement n’est pas encore activé.
+
+Ajouter :
+
+* endpoints Spring Boot Actuator
+* métriques JVM
+* métriques Docker
+
+⸻
+
+Étape 8 : Sauvegarde PostgreSQL
+
+Créer :
+
+* backup automatique
+* rotation des sauvegardes
+* restauration documentée
+
+Objectif :
+
+Aucune perte de données en cas d’échec de déploiement.
+
+⸻
+
+Étape 9 : Vérification Post-Déploiement
+
+Après chaque déploiement :
+
+Vérifier :
+
+* backend disponible
+* frontend disponible
+* base PostgreSQL accessible
+* endpoint /actuator/health UP
+
+Si un test échoue :
+
+* rollback automatique
+* pipeline marqué en échec
+
+⸻
+
+Étape 10 : Documentation
+
+Produire :
+
+1. ARCHITECTURE.md
+2. DEPLOYMENT.md
+3. ROLLBACK.md
+4. BACKUP.md
+5. GITHUB_ACTIONS.md
+
+Inclure :
+
+* diagrammes Mermaid
+* architecture cible
+* flux CI/CD
+* procédures d’exploitation
+
+⸻
+
+Contraintes
+
+* Conserver Docker Compose (pas de Kubernetes)
+* Conserver GHCR
+* Conserver PostgreSQL
+* Conserver Angular
+* Conserver Spring Boot
+* Compatible Ubuntu Server
+* Compatible GitHub Actions
+
+⸻
+
+Livrables attendus
+
+Tu dois :
+
+1. Modifier les fichiers existants.
+2. Créer les nouveaux fichiers nécessaires.
+3. Générer les workflows GitHub Actions complets.
+4. Générer les scripts de rollback.
+5. Générer les scripts de sauvegarde.
+6. Générer la documentation.
+7. Expliquer chaque modification.
+8. Justifier chaque choix technique selon les meilleures pratiques DevOps 2026.
+
+Avant toute modification, présente un plan détaillé de l’architecture cible et attends validation.
