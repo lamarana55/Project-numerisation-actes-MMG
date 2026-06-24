@@ -1,0 +1,21 @@
+# Configuration Prometheus — PN-RAVEC
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: pn-ravec
+
+scrape_configs:
+  # Prometheus lui-même
+  - job_name: prometheus
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Backend Spring Boot (Micrometer / Actuator)
+  - job_name: ravec-backend
+    metrics_path: /api/v1/actuator/prometheus
+    static_configs:
+      - targets: ['backend:8091']
+        labels:
+          application: pn-ravec
+          component: backend
