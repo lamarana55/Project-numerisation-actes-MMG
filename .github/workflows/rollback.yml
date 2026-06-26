@@ -20,39 +20,40 @@ concurrency:
 jobs:
   rollback:
     name: Rollback production
-    runs-on: ubuntu-latest
+    # Runner self-hosted sur le serveur de prod — rollback local.
+    runs-on: [self-hosted, ravec-prod]
     environment: production
+    env:
+      APP_DIR: /opt/pn-ravec
+      TARGET_TAG: ${{ github.event.inputs.image_tag }}
+      REASON: ${{ github.event.inputs.reason }}
+      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+      GHCR_USER: ${{ secrets.GHCR_USER || github.actor }}
     steps:
-      - name: Rollback par SSH
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
-          envs: TARGET_TAG,REASON,GHCR_TOKEN,GHCR_USER
-          script_stop: true
-          script: |
-            set -euo pipefail
-            cd /opt/pn-ravec
-            chmod +x ops/*.sh
-            echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
+      - uses: actions/checkout@v4
 
-            TAG="${TARGET_TAG}"
-            if [ -z "$TAG" ]; then
-              TAG=$(cat .last_successful_deploy 2>/dev/null || echo "")
-            fi
-            if [ -z "$TAG" ]; then
-              echo "Aucun tag fourni et aucun dernier déploiement enregistré. Abandon."
-              exit 1
-            fi
-            echo "↩️  Rollback vers le tag : $TAG — raison : ${REASON}"
-            ./ops/rollback.sh "$TAG"
-        env:
-          TARGET_TAG: ${{ github.event.inputs.image_tag }}
-          REASON: ${{ github.event.inputs.reason }}
-          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
-          GHCR_USER: ${{ secrets.GHCR_USER || github.actor }}
+      - name: Rollback local
+        run: |
+          set -euo pipefail
+          # Resynchroniser les scripts ops (au cas où)
+          mkdir -p "$APP_DIR/ops"
+          cp docker-compose.server.yml "$APP_DIR/"
+          cp ops/*.sh "$APP_DIR/ops/"
+          chmod +x "$APP_DIR/ops/"*.sh
+          cd "$APP_DIR"
+
+          echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
+
+          TAG="${TARGET_TAG}"
+          if [ -z "$TAG" ]; then
+            TAG=$(cat .last_successful_deploy 2>/dev/null || echo "")
+          fi
+          if [ -z "$TAG" ]; then
+            echo "::error::Aucun tag fourni et aucun dernier déploiement enregistré."
+            exit 1
+          fi
+          echo "↩️  Rollback vers le tag : $TAG — raison : ${REASON}"
+          ./ops/rollback.sh "$TAG"
 
       - name: Résumé
         if: always()

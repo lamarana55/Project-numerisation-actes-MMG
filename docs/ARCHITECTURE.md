@@ -19,7 +19,7 @@ flowchart TB
       B[Build images Docker]
       SC[Scan Trivy]
       P[Push GHCR : sha + latest]
-      D[Deploy SSH]
+      D[Deploy self-hosted runner]
       T1 --> B
       T2 --> B
       B --> SC --> P --> D

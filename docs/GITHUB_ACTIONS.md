@@ -20,8 +20,17 @@ flowchart LR
 
 1. **test-backend** / **test-frontend** : barrière qualité (Postgres service + Karma headless).
 2. **build** (matrice backend/frontend, en parallèle) : build local → **Trivy** (SARIF dans l'onglet Security) → push `sha-<commit>` + `latest`.
-3. **deploy** : `scp` du compose + scripts `ops/`, puis SSH → backup DB → pull/up par SHA → `healthcheck.sh` → **rollback auto** si KO.
+3. **deploy** (runner **self-hosted** sur le serveur) : copie locale du compose + `ops/` → backup DB → pull/up par SHA → `healthcheck.sh` → **rollback auto** si KO.
 4. **notify** : résumé dans `GITHUB_STEP_SUMMARY`, échec marqué rouge (email natif GitHub).
+
+## Modèle de runner
+
+| Job | Runner | Pourquoi |
+|-----|--------|----------|
+| `test-backend`, `test-frontend`, `build` | GitHub **hébergé** (`ubuntu-latest`) | rapides, isolés, accès GHCR |
+| `deploy`, `rollback` | **self-hosted** (`[self-hosted, ravec-prod]`) | serveur sur réseau privé → déploiement **local** |
+
+Installation : voir **[SELF_HOSTED_RUNNER.md](SELF_HOSTED_RUNNER.md)**.
 
 ## Secrets GitHub requis
 
@@ -29,14 +38,11 @@ flowchart LR
 
 | Secret | Description |
 |--------|-------------|
-| `SERVER_HOST` | IP/host du serveur de production |
-| `SERVER_USER` | Utilisateur SSH (ex. `appva`) |
-| `SERVER_SSH_KEY` | Clé privée SSH (PEM) autorisée sur le serveur |
-| `SERVER_PORT` | Port SSH (optionnel, défaut 22) |
-| `GHCR_TOKEN` | PAT GitHub avec `read:packages` (login GHCR côté serveur) |
-| `GHCR_USER` | Utilisateur GHCR (optionnel, défaut = acteur du run) |
+| `GHCR_TOKEN` | PAT GitHub (classic) avec `write:packages` + `read:packages` — login GHCR (push build + pull serveur) |
+| `GHCR_USER` | *(optionnel)* utilisateur GHCR ; défaut = acteur du run |
 
-> `GITHUB_TOKEN` est fourni automatiquement (push GHCR depuis le runner).
+> Plus de secrets SSH : le déploiement est **local** au runner self-hosted. Le PAT
+> `GHCR_TOKEN` (propriétaire des packages) évite aussi le 403 de push GHCR.
 
 ## Environnement `production`
 
