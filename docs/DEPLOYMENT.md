@@ -9,12 +9,17 @@ git push origin main
 ```
 
 Le pipeline `cd.yml` se charge de **tout** : tests → build → scan → push GHCR →
-déploiement SSH → backup → healthcheck → rollback automatique si échec.
+déploiement (runner self-hosted) → backup → healthcheck → rollback automatique si échec.
 
 ## Préparation (une seule fois)
 
-### 1. Secrets GitHub
-Voir [GITHUB_ACTIONS.md](GITHUB_ACTIONS.md#secrets-github-requis).
+### 0. Runner self-hosted (obligatoire — serveur sur réseau privé)
+Le job `deploy` tourne sur un runner installé **sur le serveur**. Installation et
+configuration : voir **[SELF_HOSTED_RUNNER.md](SELF_HOSTED_RUNNER.md)**.
+
+### 1. Secret GitHub
+Un seul requis : `GHCR_TOKEN` (PAT `write:packages`). Voir
+[GITHUB_ACTIONS.md](GITHUB_ACTIONS.md#secrets-github-requis). Plus de secrets SSH.
 
 ### 2. Serveur Ubuntu
 

@@ -113,12 +113,15 @@ jobs:
 
       - uses: docker/setup-buildx-action@v3
 
+      # Login avec un PAT (GHCR_TOKEN, scope write:packages). Comme le PAT
+      # appartient au propriétaire des packages, le push fonctionne même si les
+      # packages ne sont pas liés au dépôt (évite le 403 du GITHUB_TOKEN).
       - name: Login GHCR
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ secrets.GHCR_USER || github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
 
       # Build local (load) pour pouvoir scanner AVANT de publier.
       - name: Build image (local)
@@ -159,79 +162,75 @@ jobs:
   #  3) DEPLOY — par SHA, avec backup + healthcheck + rollback auto
   # ════════════════════════════════════════════════════════════════════════
   deploy:
-    name: Déploiement production
-    runs-on: ubuntu-latest
+    name: Déploiement production (self-hosted)
+    # Runner self-hosted installé SUR le serveur de prod (réseau privé).
+    # Le déploiement est LOCAL : aucun SSH, rien d'exposé sur Internet.
+    runs-on: [self-hosted, ravec-prod]
     needs: build
     environment: production
+    env:
+      APP_DIR: /opt/pn-ravec
+      SHA: ${{ github.sha }}
+      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+      GHCR_USER: ${{ secrets.GHCR_USER || github.actor }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Copier compose + scripts ops sur le serveur
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
-          source: "docker-compose.server.yml,ops/backup-db.sh,ops/restore-db.sh,ops/rollback.sh,ops/healthcheck.sh"
-          target: "/opt/pn-ravec"
+      - name: Déploiement local
+        run: |
+          set -euo pipefail
 
-      - name: Déploiement par SSH
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
-          envs: SHA,GHCR_TOKEN,GHCR_USER
-          script_stop: true
-          script: |
-            set -euo pipefail
-            cd /opt/pn-ravec
-            chmod +x ops/*.sh
+          # 0) Synchroniser compose + scripts ops vers le dossier applicatif
+          #    ($APP_DIR contient le .env de prod, jamais versionné).
+          mkdir -p "$APP_DIR/ops"
+          cp docker-compose.server.yml "$APP_DIR/"
+          cp ops/*.sh "$APP_DIR/ops/"
+          chmod +x "$APP_DIR/ops/"*.sh
+          cd "$APP_DIR"
 
-            NEW_TAG="sha-${SHA}"
-            export BACKEND_IMAGE="ghcr.io/lamarana55/ravec-backend:${NEW_TAG}"
-            export FRONTEND_IMAGE="ghcr.io/lamarana55/ravec-frontend:${NEW_TAG}"
+          if [ ! -f .env ]; then
+            echo "::error::$APP_DIR/.env introuvable. Créez-le depuis .env.server.example."
+            exit 1
+          fi
 
-            echo "::group::Authentification GHCR"
-            echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
-            echo "::endgroup::"
+          NEW_TAG="sha-${SHA}"
+          export BACKEND_IMAGE="ghcr.io/lamarana55/ravec-backend:${NEW_TAG}"
+          export FRONTEND_IMAGE="ghcr.io/lamarana55/ravec-frontend:${NEW_TAG}"
 
-            # Capture des images actuellement en service (pour rollback auto)
-            PREV_BACKEND=$(docker inspect --format '{{.Config.Image}}' ravec-pn-backend 2>/dev/null || echo "")
-            PREV_FRONTEND=$(docker inspect --format '{{.Config.Image}}' ravec-pn-frontend 2>/dev/null || echo "")
-            echo "Images précédentes : backend=${PREV_BACKEND:-aucune} frontend=${PREV_FRONTEND:-aucune}"
+          echo "::group::Authentification GHCR"
+          echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
+          echo "::endgroup::"
 
-            # 1) Sauvegarde PostgreSQL AVANT déploiement
-            ./ops/backup-db.sh || echo "WARN: backup échoué, on poursuit."
+          # 1) Capture des images en service (pour rollback auto)
+          PREV_BACKEND=$(docker inspect --format '{{.Config.Image}}' ravec-pn-backend 2>/dev/null || echo "")
+          PREV_FRONTEND=$(docker inspect --format '{{.Config.Image}}' ravec-pn-frontend 2>/dev/null || echo "")
+          echo "Images précédentes : backend=${PREV_BACKEND:-aucune} frontend=${PREV_FRONTEND:-aucune}"
 
-            # 2) Pull + up (nouvelles images)
-            docker compose -f docker-compose.server.yml --env-file .env pull backend frontend
-            docker compose -f docker-compose.server.yml --env-file .env up -d --remove-orphans
+          # 2) Sauvegarde PostgreSQL AVANT déploiement
+          ./ops/backup-db.sh || echo "WARN: backup échoué, on poursuit."
 
-            # 3) Vérification de santé
-            if ./ops/healthcheck.sh; then
-              echo "$NEW_TAG" >> deploy-history.log
-              echo "$NEW_TAG" > .last_successful_deploy
-              docker image prune -f
-              echo "✅ Déploiement réussi : $NEW_TAG"
+          # 3) Pull + up (nouvelles images, par SHA)
+          docker compose -f docker-compose.server.yml --env-file .env pull backend frontend
+          docker compose -f docker-compose.server.yml --env-file .env up -d --remove-orphans
+
+          # 4) Vérification de santé → rollback auto si KO
+          if ./ops/healthcheck.sh; then
+            echo "$NEW_TAG" >> deploy-history.log
+            echo "$NEW_TAG" > .last_successful_deploy
+            docker image prune -f
+            echo "✅ Déploiement réussi : $NEW_TAG"
+          else
+            echo "❌ Healthcheck échoué — ROLLBACK automatique"
+            if [ -n "$PREV_BACKEND" ] && [ -n "$PREV_FRONTEND" ]; then
+              export BACKEND_IMAGE="$PREV_BACKEND"
+              export FRONTEND_IMAGE="$PREV_FRONTEND"
+              docker compose -f docker-compose.server.yml --env-file .env up -d --remove-orphans
+              echo "↩️  Rollback effectué : backend=$PREV_BACKEND frontend=$PREV_FRONTEND"
             else
-              echo "❌ Healthcheck échoué — ROLLBACK automatique"
-              if [ -n "$PREV_BACKEND" ] && [ -n "$PREV_FRONTEND" ]; then
-                export BACKEND_IMAGE="$PREV_BACKEND"
-                export FRONTEND_IMAGE="$PREV_FRONTEND"
-                docker compose -f docker-compose.server.yml --env-file .env up -d --remove-orphans
-                echo "↩️  Rollback effectué : backend=$PREV_BACKEND frontend=$PREV_FRONTEND"
-              else
-                echo "Aucune version précédente — rollback impossible."
-              fi
-              exit 1
+              echo "Aucune version précédente — rollback impossible."
             fi
-        env:
-          SHA: ${{ github.sha }}
-          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
-          GHCR_USER: ${{ secrets.GHCR_USER || github.actor }}
+            exit 1
+          fi
 
   # ════════════════════════════════════════════════════════════════════════
   #  4) NOTIFICATION (succès / échec) — résumé natif GitHub
